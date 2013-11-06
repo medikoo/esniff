@@ -1,7 +1,7 @@
 # esniff
-## JavaScript source code scanner
+## Low footprint JavaScript source code parser
 
-Low footprint, fast code analyzer, which allows you to find all occurencies of given function/method calls without a need to generate full syntax tree.
+Low footprint, fast source code parser, which allows you to find all occurrences of given function/method calls without a need to generate full syntax tree.
 
 ### Usage
 
