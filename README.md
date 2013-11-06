@@ -8,7 +8,8 @@ Low footprint, fast code analyzer, which allows you to find all occurencies of g
 ```javascript
 var findRequires = require('esniff/function')('require');
 
-findRequires('var x = require(\'foo/bar\')'); // [{ point: 17, column: 17, line: 1, raw: '\'foo/bar\'' }]
+findRequires('var x = require(\'foo/bar\')');
+// [{ point: 17, column: 17, line: 1, raw: '\'foo/bar\'' }]
 ```
 
 ### Installation
