@@ -2,8 +2,10 @@
 
 var from         = require('es5-ext/array/from')
   , primitiveSet = require('es5-ext/object/primitive-set')
+  , eolSet       = require('./ws-eol')
+  , wsSet        = require('./ws')
 
-  , keys = Object.keys, hasOwnProperty = Object.prototype.hasOwnProperty
+  , hasOwnProperty = Object.prototype.hasOwnProperty
 
   , next, move, startCollect, endCollect, collectNest
   , $common, $string, $comment, $multiComment, $regExp
@@ -14,7 +16,7 @@ var from         = require('es5-ext/array/from')
 
   , quote
   , collect, data, nestRelease, token
-  , preDeclSet, ambigSet, preExpSet, eolSet, inlineWsSet, wsSet;
+  , preDeclSet, ambigSet, preExpSet;
 
 // Opens declaration blocks
 preDeclSet = primitiveSet.apply(null, from(';{'));
@@ -22,11 +24,6 @@ preDeclSet = primitiveSet.apply(null, from(';{'));
 ambigSet = primitiveSet.apply(null, from(':}'));
 // Opens expression blocks
 preExpSet = primitiveSet.apply(null, from('=([,<>+-*/%&|^!~?'));
-eolSet = primitiveSet.apply(null, from('\n\r\u2028\u2029'));
-inlineWsSet = primitiveSet.apply(null, from(' \f\t\v​\u00a0\u1680​\u180e' +
-	'\u2000​\u2001\u2002​\u2003\u2004​\u2005\u2006​\u2007\u2008​\u2009\u200a' +
-	'​​​\u202f\u205f​\u3000'));
-wsSet = primitiveSet.apply(null, keys(eolSet).concat(keys(inlineWsSet)));
 
 next = function () {
 	if (!char) return;
