@@ -3,7 +3,6 @@
 var traverse = require('./')
 
   , hasOwnProperty = Object.prototype.hasOwnProperty
-  , create = Object.create, keys = Object.keys
 
   , $common = traverse.$common
   , wsSet = traverse.wsSet
