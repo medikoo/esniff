@@ -17,12 +17,13 @@ walker = function (ast) {
 	if (!ast.type) return;
 	if ((ast.type === 'MemberExpression') &&
 			(ast.object.name === 'foo')) {
-		this.deps[ast.property.name] = true;
+		this.deps.push({ name: ast.property.name, start: ast.property.range[0],
+			end: ast.property.range[1] });
 	}
 };
 
 module.exports = function (code) {
-	var ctx = { code: code, deps: Object.create(null) };
+	var ctx = { code: code, deps: [] };
 	walker.call(ctx, esprima.parse(code, { range: true, loc: true }));
-	return Object.keys(ctx.deps);
+	return ctx.deps;
 };

@@ -118,10 +118,10 @@ module.exports = function (objName) {
 	objName = String(objName);
 	l = objName.length;
 	return function (code) {
-		var names = create(null);
+		var data = [];
 		code = String(code);
 		traverse(code, function (char, i, previous) {
-			var j = 0, name;
+			var j = 0, name, startIndex;
 			if (char !== objName[j]) return $common;
 			if (previous === '.') return $common;
 			--i;
@@ -131,14 +131,15 @@ module.exports = function (objName) {
 			while (hasOwnProperty.call(wsSet, code[++i])) continue; //jslint: skip
 			if (code[i] !== '.') return $common;
 			while (hasOwnProperty.call(wsSet, code[++i])) continue; //jslint: skip
+			startIndex = i;
 			name = '';
 			if (!reIdentStart.test(char = code[i])) return $common;
 			name += char;
 			while ((char = code[++i]) && reIdentNext.test(char)) name += char;
-			names[name] = true;
+			data.push({ name: name, start: startIndex, end: i });
 			move(i);
 			return $common;
 		});
-		return keys(names);
+		return data;
 	};
 };
