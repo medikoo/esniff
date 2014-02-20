@@ -122,4 +122,4 @@ require('thirty\
 	break-line \
 	one');
 
-module.exports = require('thirty\two')
+module.exports = /"/, require('thirty\two')
