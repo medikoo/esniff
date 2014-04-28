@@ -21,15 +21,15 @@
     "type": "git",
     "url": "git://github.com/medikoo/esniff.git"
   },
-  "scripts": {
-    "test": "node ./node_modules/tad/bin/tad"
-  },
   "dependencies": {
     "es5-ext": "git://github.com/medikoo/es5-ext.git"
   },
   "devDependencies": {
     "esprima": "1.x",
     "tad": "~0.1.20"
+  },
+  "scripts": {
+    "test": "node ./node_modules/tad/bin/tad"
   },
   "license": "MIT"
 }
