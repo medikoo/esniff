@@ -1,7 +1,7 @@
 {
   "name": "esniff",
   "version": "0.0.0",
-  "description": "ECMAScript source code sniffer",
+  "description": "Low footprint ECMAScript source code parser",
   "author": "Mariusz Nowak <medyk@medikoo.com> (http://www.medikoo.com/)",
   "keywords": [
     "sniff",
