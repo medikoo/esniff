@@ -26,7 +26,7 @@ module.exports = function (name) {
 					if (code[++i] !== name[j]) return $common;
 				}
 			}
-			while (hasOwnProperty.call(wsSet, code[++i])) continue; //jslint: skip
+			while (hasOwnProperty.call(wsSet, code[++i])) continue; //jslint: ignore
 			if (code[i] !== '(') return $common;
 			move(i + 1);
 			return collectNest();
