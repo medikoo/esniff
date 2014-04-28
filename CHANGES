@@ -1,0 +1,7 @@
+v0.1.0  --  2014.04.28
+* Assure strictly npm hosted dependencies
+* Add accessedProperties resolver
+* Expose whitespace maps as individual modules
+
+v0.0.0  --  2013.11.06
+Initial (dev version)
