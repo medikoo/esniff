@@ -22,11 +22,11 @@
     "url": "git://github.com/medikoo/esniff.git"
   },
   "dependencies": {
-    "es5-ext": "git://github.com/medikoo/es5-ext.git"
+    "es5-ext": "~0.10.2"
   },
   "devDependencies": {
-    "esprima": "1.x",
-    "tad": "~0.1.20"
+    "esprima": "~1.1.1",
+    "tad": "0.2.x"
   },
   "scripts": {
     "test": "node ./node_modules/tad/bin/tad"
