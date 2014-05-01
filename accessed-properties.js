@@ -127,9 +127,9 @@ module.exports = function (objName) {
 			while (++j < l) {
 				if (code[++i] !== objName[j]) return $common;
 			}
-			while (hasOwnProperty.call(wsSet, code[++i])) continue; //jslint: skip
+			while (hasOwnProperty.call(wsSet, code[++i])) continue; //jslint: ignore
 			if (code[i] !== '.') return $common;
-			while (hasOwnProperty.call(wsSet, code[++i])) continue; //jslint: skip
+			while (hasOwnProperty.call(wsSet, code[++i])) continue; //jslint: ignore
 			startIndex = i;
 			name = '';
 			if (!reIdentStart.test(char = code[i])) return $common;

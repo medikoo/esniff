@@ -18,13 +18,13 @@ module.exports = function (t, a, d) {
 			if (previous === '.') return t.$common;
 			if (str[i] !== 'o') return t.$common;
 			if (str[++i] !== 'o') return t.$common;
-			while (t.wsSet[str[++i]]) continue; //jslint: skip
+			while (t.wsSet[str[++i]]) continue; //jslint: ignore
 			if (str[i] !== '.') return t.$common;
-			while (t.wsSet[str[++i]]) continue; //jslint: skip
+			while (t.wsSet[str[++i]]) continue; //jslint: ignore
 			if (str[i] !== 'b') return t.$common;
 			if (str[++i] !== 'a') return t.$common;
 			if (str[++i] !== 'r') return t.$common;
-			while (t.wsSet[str[++i]]) continue; //jslint: skip
+			while (t.wsSet[str[++i]]) continue; //jslint: ignore
 			if (str[i] !== '(') return t.$common;
 			t.move(i);
 			plainR.push({ point: i + 2, line: line, column: column + (i - j) + 2 });
