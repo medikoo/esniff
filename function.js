@@ -22,11 +22,13 @@ module.exports = function (name) {
 			if (previous === '.') return $common;
 			if (multi) {
 				if (code[i] !== name[++j]) return $common;
+				++i;
 				while (++j !== l) {
-					if (code[++i] !== name[j]) return $common;
+					if (code[i] !== name[j]) return $common;
+					++i;
 				}
 			}
-			while (hasOwnProperty.call(wsSet, code[++i])) continue; //jslint: ignore
+			while (hasOwnProperty.call(wsSet, code[i])) ++i;
 			if (code[i] !== '(') return $common;
 			move(i + 1);
 			return collectNest();
