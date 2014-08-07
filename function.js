@@ -25,6 +25,8 @@ module.exports = function (name) {
 				while (++j !== l) {
 					if (code[++i] !== name[j]) return $common;
 				}
+			} else {
+				--i;
 			}
 			while (hasOwnProperty.call(wsSet, code[++i])) continue; //jslint: ignore
 			if (code[i] !== '(') return $common;
