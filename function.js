@@ -10,23 +10,18 @@ var traverse = require('./')
   , move = traverse.move;
 
 module.exports = function (name) {
-	var l, multi;
+	var l;
 	name = String(name);
 	l = name.length;
-	multi = l > 1;
 	return function (code) {
 		code = String(code);
 		return traverse(code, function (char, i, previous) {
 			var j = 0;
 			if (char !== name[j]) return $common;
 			if (previous === '.') return $common;
-			if (multi) {
-				if (code[i] !== name[++j]) return $common;
+			while (++j !== l) {
+				if (code[i] !== name[j]) return $common;
 				++i;
-				while (++j !== l) {
-					if (code[i] !== name[j]) return $common;
-					++i;
-				}
 			}
 			while (hasOwnProperty.call(wsSet, code[i])) ++i;
 			if (code[i] !== '(') return $common;
