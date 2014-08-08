@@ -1,6 +1,6 @@
 {
   "name": "esniff",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Low footprint ECMAScript source code parser",
   "author": "Mariusz Nowak <medyk@medikoo.com> (http://www.medikoo.com/)",
   "keywords": [
@@ -22,10 +22,10 @@
     "url": "git://github.com/medikoo/esniff.git"
   },
   "dependencies": {
-    "es5-ext": "~0.10.2"
+    "es5-ext": "~0.10.4"
   },
   "devDependencies": {
-    "esprima": "~1.1.1",
+    "esprima": "~1.2.2",
     "tad": "0.2.x",
     "xlint": "~0.2.1",
     "xlint-jslint-medikoo": "0.1.x"
