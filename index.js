@@ -2,8 +2,8 @@
 
 var from         = require('es5-ext/array/from')
   , primitiveSet = require('es5-ext/object/primitive-set')
-  , eolSet       = require('./ws-eol')
-  , wsSet        = require('./ws')
+  , eolSet       = require('./lib/ws-eol')
+  , wsSet        = require('./lib/ws')
 
   , hasOwnProperty = Object.prototype.hasOwnProperty
 
