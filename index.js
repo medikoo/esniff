@@ -15,7 +15,7 @@ var from         = require('es5-ext/array/from')
   , callback
 
   , quote
-  , collect, data, nestRelease, token
+  , collectIndex, data, nestRelease
   , preDeclSet, ambigSet, preExpSet;
 
 // Opens declaration blocks
@@ -27,7 +27,6 @@ preExpSet = primitiveSet.apply(null, from('=([,<>+-*/%&|^!~?'));
 
 next = function () {
 	if (!char) return;
-	if (collect) token += char;
 	if (!hasOwnProperty.call(wsSet, char)) {
 		previous = char;
 		afterWs = false;
@@ -49,7 +48,6 @@ move = function (j) {
 	--j;
 	while (i !== j) {
 		if (!char) return;
-		if (collect) token += char;
 		if (hasOwnProperty.call(eolSet, char)) {
 			columnStart = i;
 			++line;
@@ -61,25 +59,23 @@ move = function (j) {
 };
 
 startCollect = function (oldNestRelease) {
-	if (token != null) nestedTokens.push([data, token, oldNestRelease]);
+	if (collectIndex != null) nestedTokens.push([data, collectIndex, oldNestRelease]);
 	data = { line: line, column: i - columnStart, point: i };
-	token = '';
-	collect = true;
+	collectIndex = i - 1;
 };
 
 endCollect = function () {
 	var previous;
-	data.raw = token;
+	data.raw = str.slice(collectIndex, i - 1);
 	results.push(data);
 	if (nestedTokens.length) {
 		previous = nestedTokens.pop();
 		data = previous[0];
-		token = previous[1] + token;
+		collectIndex = previous[1];
 		nestRelease = previous[2];
 		return;
 	}
-	collect = false;
-	token = null;
+	collectIndex = null;
 	nestRelease = null;
 };
 
