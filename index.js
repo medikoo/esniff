@@ -30,12 +30,12 @@ next = function () {
 	if (!hasOwnProperty.call(wsSet, char)) {
 		previous = char;
 		afterWs = false;
-	} else if (hasOwnProperty.call(eolSet, char)) {
-		columnStart = i;
-		++line;
-		afterWs = true;
 	} else {
 		afterWs = true;
+		if (hasOwnProperty.call(eolSet, char)) {
+			columnStart = i;
+			++line;
+		}
 	}
 	char = str[i];
 	++i;
