@@ -10,7 +10,7 @@ var from         = require('es5-ext/array/from')
   , next, move, startCollect, endCollect, collectNest
   , $common, $string, $comment, $multiComment, $regExp
 
-  , str, i, char, line, column, afterWs, previous
+  , str, i, char, line, columnStart, afterWs, previous
   , blocks, nest, tenaryNest, lastBlock, lastTenary, nestedTokens, results
   , callback
 
@@ -30,15 +30,13 @@ next = function () {
 	if (collect) token += char;
 	if (!hasOwnProperty.call(wsSet, char)) {
 		previous = char;
-		++column;
 		afterWs = false;
 	} else if (hasOwnProperty.call(eolSet, char)) {
-		column = 1;
+		columnStart = i;
 		++line;
 		afterWs = true;
 	} else {
 		afterWs = true;
-		++column;
 	}
 	char = str[i];
 	++i;
@@ -52,13 +50,9 @@ move = function (j) {
 	while (i !== j) {
 		if (!char) return;
 		if (collect) token += char;
-		if (!hasOwnProperty.call(wsSet, char)) {
-			++column;
-		} else if (hasOwnProperty.call(eolSet, char)) {
-			column = 1;
+		if (hasOwnProperty.call(eolSet, char)) {
+			columnStart = i;
 			++line;
-		} else {
-			++column;
 		}
 		char = str[i];
 		++i;
@@ -68,7 +62,7 @@ move = function (j) {
 
 startCollect = function (oldNestRelease) {
 	if (token != null) nestedTokens.push([data, token, oldNestRelease]);
-	data = { line: line, column: column, point: i };
+	data = { line: line, column: i - columnStart, point: i };
 	token = '';
 	collect = true;
 };
@@ -169,7 +163,7 @@ $common = function () {
 		}
 	}
 
-	return callback(char, i, previous, line, column);
+	return callback(char, i, previous, line, i - columnStart);
 };
 
 $string = function () {
@@ -209,7 +203,7 @@ module.exports = exports = function (code, cb) {
 	i = 1;
 	char = str[0];
 	line = 1;
-	column = 1;
+	columnStart = 0;
 	afterWs = false;
 	previous = null;
 	blocks = [];
