@@ -12,7 +12,7 @@ module.exports = function (name) {
 	name = String(value(name));
 	l = name.length;
 	return function (code) {
-		code = String(code);
+		code = String(value(code));
 		return esniff(code, function (char, i, previous) {
 			if (char !== name[0]) return next();
 			if (previous === '.') return next();
