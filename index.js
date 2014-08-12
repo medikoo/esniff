@@ -13,9 +13,9 @@ var from         = require('es5-ext/array/from')
   , move, startCollect, endCollect, collectNest
   , $ws, $common, $string, $comment, $multiComment, $regExp
 
-  , str, i, char, line, columnIndex, afterWs, previousChar
+  , i, char, line, columnIndex, afterWs, previousChar
   , nest, nestedTokens, results
-  , callback
+  , str, callback
 
   , quote
   , collectIndex, data, nestRelease
