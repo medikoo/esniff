@@ -106,7 +106,7 @@ $common = function () {
 		return $ws;
 	}
 
-	return userCallback(char, i, previousChar, line, i - columnIndex);
+	return userCallback(i, previousChar);
 };
 
 $comment = function () {

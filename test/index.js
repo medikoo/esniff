@@ -12,13 +12,12 @@ module.exports = function (t, a, d) {
 			d(err);
 			return;
 		}
-		t(str, 'f', function (char, i, previous) {
+		t(str, 'f', function (i, previous) {
 			if (previous === '.') return t.next();
 			if (str.indexOf('foo', i) !== i) return t.next();
 			t.next(3);
 			i = t.index;
-			char = str[i];
-			if (char !== '.') return t.resume();
+			if (str[i] !== '.') return t.resume();
 			t.next();
 			i = t.index;
 			if (str.indexOf('bar', i) !== i) return t.resume();

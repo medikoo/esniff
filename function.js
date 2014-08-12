@@ -14,7 +14,7 @@ module.exports = function (name) {
 	if (!l) throw new TypeError(name + " is not valid function name");
 	return function (code) {
 		code = String(value(code));
-		return esniff(code, name[0], function (char, i, previous) {
+		return esniff(code, name[0], function (i, previous) {
 			if (previous === '.') return next();
 			if (code.indexOf(name, i) !== i) return next();
 			next(l);
