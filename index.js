@@ -75,7 +75,6 @@ collectNest = function () {
 };
 
 $common = function () {
-	var next;
 	if ((char === '\'') || (char === '"')) {
 		quote = char;
 		char = str[++i];
@@ -90,15 +89,6 @@ $common = function () {
 	} else if (char === '}') {
 		if (nestRelease === --nest) endCollect();
 	} else if (char === '/') {
-		next = str[i + 1];
-		if (next === '/') {
-			char = str[i += 2];
-			return $comment;
-		}
-		if (next === '*') {
-			char = str[i += 2];
-			return $multiComment;
-		}
 		if (hasOwnProperty.call(preExpSet, previousChar) ||
 				hasOwnProperty.call(preDeclSet, previousChar) || (previousChar === '}')) {
 			char = str[++i];
@@ -116,14 +106,59 @@ $common = function () {
 	return callback(char, i, previousChar, line, i - columnIndex);
 };
 
-$ws = function () {
-	if (!char) return;
-	afterWs = false;
-	while (hasOwnProperty.call(wsSet, char)) {
-		afterWs = true;
+$comment = function () {
+	while (true) {
+		if (!char) return;
 		if (hasOwnProperty.call(eolSet, char)) {
 			columnIndex = i + 1;
 			++line;
+			return;
+		}
+		char = str[++i];
+	}
+};
+
+$multiComment = function () {
+	while (true) {
+		if (!char) return;
+		if (char === '*') {
+			char = str[++i];
+			if (!char) return;
+			if (char === '/') return;
+		}
+		if (hasOwnProperty.call(eolSet, char)) {
+			columnIndex = i + 1;
+			++line;
+		}
+		char = str[++i];
+	}
+};
+
+$ws = function () {
+	var next;
+	while (true) {
+		if (!char) return;
+		if (hasOwnProperty.call(wsSet, char)) {
+			afterWs = true;
+			if (hasOwnProperty.call(eolSet, char)) {
+				columnIndex = i + 1;
+				++line;
+			}
+		} else if (char === '/') {
+			next = str[i + 1];
+			if (next === '/') {
+				char = str[i += 2];
+				afterWs = true;
+				$comment();
+			} else if (next === '*') {
+				char = str[i += 2];
+				afterWs = true;
+				$multiComment();
+			} else {
+				break;
+			}
+		} else {
+			break;
 		}
 		char = str[++i];
 	}
@@ -143,38 +178,6 @@ $string = function () {
 				columnIndex = i + 1;
 				++line;
 			}
-		}
-		char = str[++i];
-	}
-};
-
-$comment = function () {
-	while (true) {
-		if (!char) return;
-		if (hasOwnProperty.call(eolSet, char)) {
-			columnIndex = i + 1;
-			++line;
-			char = str[++i];
-			return $ws;
-		}
-		char = str[++i];
-	}
-};
-
-$multiComment = function () {
-	while (true) {
-		if (!char) return;
-		if (char === '*') {
-			char = str[++i];
-			if (!char) return;
-			if (char === '/') {
-				char = str[++i];
-				return $ws;
-			}
-		}
-		if (hasOwnProperty.call(eolSet, char)) {
-			columnIndex = i + 1;
-			++line;
 		}
 		char = str[++i];
 	}
