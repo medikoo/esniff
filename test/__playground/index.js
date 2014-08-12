@@ -37,7 +37,7 @@ if (a) {
 
 var x = {
 	raz: 'dwa'
-} /foo.bar("eight");
+}
 
 obj.foo.bar('object');
 

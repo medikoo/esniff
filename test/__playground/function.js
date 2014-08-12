@@ -37,7 +37,7 @@ if (a) {
 
 var x = {
 	raz: 'dwa'
-} /require("eight");
+}
 
 obj.require('object');
 
