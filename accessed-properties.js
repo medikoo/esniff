@@ -1,12 +1,10 @@
 'use strict';
 
-var traverse = require('./')
+var value    = require('es5-ext/object/valid-value')
+  , esniff = require('./')
 
-  , hasOwnProperty = Object.prototype.hasOwnProperty
-
-  , $common = traverse.$common
-  , wsSet = traverse.wsSet
-  , move = traverse.move
+  , next = esniff.next
+  , resume = esniff.resume
 
 // Stolen from excellent work by Mathias Bynens, see:
 // http://mathiasbynens.be/notes/javascript-properties
@@ -114,30 +112,27 @@ var traverse = require('./')
 
 module.exports = function (objName) {
 	var l;
-	objName = String(objName);
+	objName = String(value(objName));
 	l = objName.length;
+	if (!l) throw new TypeError(objName + " is not valid object name");
 	return function (code) {
 		var data = [];
-		code = String(code);
-		traverse(code, function (char, i, previous) {
-			var j = 0, name, startIndex;
-			if (char !== objName[j]) return $common;
-			if (previous === '.') return $common;
-			--i;
-			while (++j < l) {
-				if (code[++i] !== objName[j]) return $common;
-			}
-			while (hasOwnProperty.call(wsSet, code[++i])) continue; //jslint: ignore
-			if (code[i] !== '.') return $common;
-			while (hasOwnProperty.call(wsSet, code[++i])) continue; //jslint: ignore
-			startIndex = i;
+		code = String(value(code));
+		esniff(code, objName[0], function (i, previous) {
+			var name, startIndex, char;
+			if (previous === '.') return next();
+			if (code.indexOf(objName, i) !== i) return next();
+			next(l);
+			i = esniff.index;
+			if (code[i] !== '.') return resume();
+			next();
+			startIndex = i = esniff.index;
 			name = '';
-			if (!reIdentStart.test(char = code[i])) return $common;
+			if (!reIdentStart.test(char = code[i])) return resume();
 			name += char;
 			while ((char = code[++i]) && reIdentNext.test(char)) name += char;
 			data.push({ name: name, start: startIndex, end: i });
-			move(i);
-			return $common;
+			return next(i - startIndex);
 		});
 		return data;
 	};
