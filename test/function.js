@@ -15,21 +15,21 @@ module.exports = function (t) {
 					return;
 				}
 				plainR = t('require')(str);
-				astR = ast(str);
+				astR = ast(str, 'require');
 				a(plainR.length, astR.length, "Length");
 				astR.forEach(function (val, i) { a.deep(plainR[i], val, i); });
 				d();
 			});
 		},
 		"One character name": function (a, d) {
-			readFile(pg + '/function.js', 'utf-8', function (err, str) {
+			readFile(pg + '/function-one-char.js', 'utf-8', function (err, str) {
 				var plainR, astR;
 				if (err) {
 					d(err);
 					return;
 				}
-				plainR = t('require')(str);
-				astR = ast(str);
+				plainR = t('_')(str);
+				astR = ast(str, '_');
 				a(plainR.length, astR.length, "Length");
 				astR.forEach(function (val, i) { a.deep(plainR[i], val, i); });
 				d();

@@ -4,7 +4,8 @@ var last    = require('es5-ext/array/#/last')
   , esprima = require('esprima')
 
   , isArray = Array.isArray, keys = Object.keys
-  , walker, eolRe;
+  , walker, eolRe
+  , fnName;
 
 eolRe = /(?:\r\n|[\n\r\u2028\u2029])/;
 
@@ -19,7 +20,7 @@ walker = function (ast) {
 		if (key !== 'range') walker.call(this, ast[key]);
 	}, this);
 	if ((ast.type === 'CallExpression') && (ast.callee.type === 'Identifier') &&
-			(ast.callee.name === 'require') && (this.code[ast.range[0]] !== '(')) {
+			(ast.callee.name === fnName) && (this.code[ast.range[0]] !== '(')) {
 		dep = { point: this.code.indexOf('(', ast.range[0]) + 2 };
 		dep.raw = this.code.slice(dep.point - 1, ast.range[1] - 1);
 		lines = this.code.slice(ast.range[0], dep.point).split(eolRe);
@@ -30,8 +31,9 @@ walker = function (ast) {
 	}
 };
 
-module.exports = function (code) {
+module.exports = function (code, name) {
 	var ctx = { code: code, deps: [] };
-	walker.call(ctx, esprima.parse(code, { range: true, loc: true }));
+	fnName = name;
+	walker.call(ctx, esprima.parse(code, { range: true, loc: true }), name);
 	return ctx.deps;
 };
