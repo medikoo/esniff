@@ -15,7 +15,7 @@ var from         = require('es5-ext/array/from')
 
   , i, char, line, columnIndex, afterWs, previousChar
   , nest, nestedTokens, results
-  , str, callback
+  , userCode, userCallback
 
   , quote
   , collectIndex, data, nestRelease
@@ -41,7 +41,7 @@ move = function (j) {
 		} else {
 			previousChar = char;
 		}
-		char = str[++i];
+		char = userCode[++i];
 	}
 };
 
@@ -53,7 +53,7 @@ startCollect = function (oldNestRelease) {
 
 endCollect = function () {
 	var previous;
-	data.raw = str.slice(collectIndex, i);
+	data.raw = userCode.slice(collectIndex, i);
 	results.push(data);
 	if (nestedTokens.length) {
 		previous = nestedTokens.pop();
@@ -79,7 +79,7 @@ collectNest = function () {
 $common = function () {
 	if ((char === '\'') || (char === '"')) {
 		quote = char;
-		char = str[++i];
+		char = userCode[++i];
 		return $string;
 	}
 	if (char === '(') {
@@ -93,7 +93,7 @@ $common = function () {
 	} else if (char === '/') {
 		if (hasOwnProperty.call(preExpSet, previousChar) ||
 				hasOwnProperty.call(preDeclSet, previousChar) || (previousChar === '}')) {
-			char = str[++i];
+			char = userCode[++i];
 			return $regExp;
 		}
 	}
@@ -101,11 +101,11 @@ $common = function () {
 			!hasOwnProperty.call(preDeclSet, previousChar) &&
 			!hasOwnProperty.call(ambigSet, previousChar)) {
 		previousChar = char;
-		char = str[++i];
+		char = userCode[++i];
 		return $ws;
 	}
 
-	return callback(char, i, previousChar, line, i - columnIndex);
+	return userCallback(char, i, previousChar, line, i - columnIndex);
 };
 
 $comment = function () {
@@ -116,7 +116,7 @@ $comment = function () {
 			++line;
 			return;
 		}
-		char = str[++i];
+		char = userCode[++i];
 	}
 };
 
@@ -124,7 +124,7 @@ $multiComment = function () {
 	while (true) {
 		if (!char) return;
 		if (char === '*') {
-			char = str[++i];
+			char = userCode[++i];
 			if (!char) return;
 			if (char === '/') return;
 		}
@@ -132,7 +132,7 @@ $multiComment = function () {
 			columnIndex = i + 1;
 			++line;
 		}
-		char = str[++i];
+		char = userCode[++i];
 	}
 };
 
@@ -147,13 +147,13 @@ $ws = function () {
 				++line;
 			}
 		} else if (char === '/') {
-			next = str[i + 1];
+			next = userCode[i + 1];
 			if (next === '/') {
-				char = str[i += 2];
+				char = userCode[i += 2];
 				afterWs = true;
 				$comment();
 			} else if (next === '*') {
-				char = str[i += 2];
+				char = userCode[i += 2];
 				afterWs = true;
 				$multiComment();
 			} else {
@@ -162,7 +162,7 @@ $ws = function () {
 		} else {
 			break;
 		}
-		char = str[++i];
+		char = userCode[++i];
 	}
 	return $common;
 };
@@ -171,17 +171,17 @@ $string = function () {
 	while (true) {
 		if (!char) return;
 		if (char === quote) {
-			char = str[++i];
+			char = userCode[++i];
 			previousChar = quote;
 			return $ws;
 		}
 		if (char === '\\') {
-			if (hasOwnProperty.call(eolSet, str[++i])) {
+			if (hasOwnProperty.call(eolSet, userCode[++i])) {
 				columnIndex = i + 1;
 				++line;
 			}
 		}
-		char = str[++i];
+		char = userCode[++i];
 	}
 };
 
@@ -190,21 +190,21 @@ $regExp = function () {
 		if (!char) return;
 		if (char === '/') {
 			previousChar = '/';
-			char = str[++i];
+			char = userCode[++i];
 			return $ws;
 		}
 		if (char === '\\') ++i;
-		char = str[++i];
+		char = userCode[++i];
 	}
 };
 
-module.exports = exports = function (code, cb) {
+module.exports = exports = function (code, callback) {
 	var state;
 
-	str = String(value(code));
-	callback = callable(cb);
+	userCode = String(value(code));
+	userCallback = callable(callback);
 	i = 0;
-	char = str[i];
+	char = userCode[i];
 	line = 1;
 	columnIndex = 0;
 	afterWs = false;
