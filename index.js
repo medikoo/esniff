@@ -2,6 +2,8 @@
 
 var from         = require('es5-ext/array/from')
   , primitiveSet = require('es5-ext/object/primitive-set')
+  , value        = require('es5-ext/object/valid-value')
+  , callable     = require('es5-ext/object/valid-callable')
   , d            = require('d')
   , eolSet       = require('./lib/ws-eol')
   , wsSet        = require('./lib/ws')
@@ -199,7 +201,8 @@ $regExp = function () {
 module.exports = exports = function (code, cb) {
 	var state;
 
-	str = String(code);
+	str = String(value(code));
+	callback = callable(cb);
 	i = 0;
 	char = str[i];
 	line = 1;
@@ -209,7 +212,6 @@ module.exports = exports = function (code, cb) {
 	nest = 0;
 	nestedTokens = [];
 	results = [];
-	callback = cb;
 	exports.forceStop = false;
 	state = $ws;
 	while (state) state = state();
