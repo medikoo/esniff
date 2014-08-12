@@ -78,7 +78,7 @@ function test() {
 
 
 function test() {
-	return require('fifteen');
+	return require/* raz */('fifteen');
 }
 
 (require)('donottake')
