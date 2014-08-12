@@ -2,16 +2,17 @@
 
 var from         = require('es5-ext/array/from')
   , primitiveSet = require('es5-ext/object/primitive-set')
+  , d            = require('d')
   , eolSet       = require('./lib/ws-eol')
   , wsSet        = require('./lib/ws')
 
   , hasOwnProperty = Object.prototype.hasOwnProperty
 
-  , next, move, startCollect, endCollect, collectNest
-  , $common, $string, $comment, $multiComment, $regExp
+  , move, startCollect, endCollect, collectNest
+  , $ws, $common, $string, $comment, $multiComment, $regExp
 
-  , str, i, char, line, columnStart, afterWs, previous
-  , blocks, nest, tenaryNest, lastBlock, lastTenary, nestedTokens, results
+  , str, i, char, line, columnIndex, afterWs, previousChar
+  , nest, nestedTokens, results
   , callback
 
   , quote
@@ -25,48 +26,32 @@ ambigSet = primitiveSet.apply(null, from(':}'));
 // Opens expression blocks
 preExpSet = primitiveSet.apply(null, from('=([,<>+-*/%&|^!~?'));
 
-next = function () {
-	if (!char) return;
-	if (!hasOwnProperty.call(wsSet, char)) {
-		previous = char;
-		afterWs = false;
-	} else {
-		afterWs = true;
-		if (hasOwnProperty.call(eolSet, char)) {
-			columnStart = i;
-			++line;
-		}
-	}
-	char = str[i];
-	++i;
-	return char;
-};
-
 move = function (j) {
 	if (!char) return;
 	if (i >= j) return;
-	--j;
 	while (i !== j) {
 		if (!char) return;
-		if (hasOwnProperty.call(eolSet, char)) {
-			columnStart = i;
-			++line;
+		if (hasOwnProperty.call(wsSet, char)) {
+			if (hasOwnProperty.call(eolSet, char)) {
+				columnIndex = i;
+				++line;
+			}
+		} else {
+			previousChar = char;
 		}
-		char = str[i];
-		++i;
+		char = str[++i];
 	}
-	next();
 };
 
 startCollect = function (oldNestRelease) {
 	if (collectIndex != null) nestedTokens.push([data, collectIndex, oldNestRelease]);
-	data = { line: line, column: i - columnStart, point: i };
-	collectIndex = i - 1;
+	data = { point: i + 1, line: line, column: i + 1 - columnIndex };
+	collectIndex = i;
 };
 
 endCollect = function () {
 	var previous;
-	data.raw = str.slice(collectIndex, i - 1);
+	data.raw = str.slice(collectIndex, i);
 	results.push(data);
 	if (nestedTokens.length) {
 		previous = nestedTokens.pop();
@@ -75,6 +60,7 @@ endCollect = function () {
 		nestRelease = previous[2];
 		return;
 	}
+	data = null;
 	collectIndex = null;
 	nestRelease = null;
 };
@@ -83,141 +69,162 @@ collectNest = function () {
 	var old = nestRelease;
 	nestRelease = nest;
 	++nest;
-	if (!next()) return $common;
+	move(i + 1);
 	startCollect(old);
-	return $common();
+	return $ws;
 };
 
 $common = function () {
-	var prev, val;
-	while (char && hasOwnProperty.call(wsSet, char)) next();
-	if (char === '.') return $common;
+	var next;
 	if ((char === '\'') || (char === '"')) {
 		quote = char;
+		char = str[++i];
 		return $string;
 	}
 	if (char === '(') {
 		++nest;
-		return $common;
-	}
-	if (char === ')') {
+	} else if (char === ')') {
 		if (nestRelease === --nest) endCollect();
-		return $common;
-	}
-	if (char === '{') {
+	} else if (char === '{') {
 		++nest;
-		if (!previous) val = true;
-		else if (preExpSet[previous]) val = false;
-		else if ((previous === ':') && lastTenary) val = false;
-		else val = true;
-		blocks.push(val);
-		return $common;
-	}
-	if (char === '}') {
-		if (nestRelease === --nest) {
-			nestRelease = null;
-			endCollect();
-			if (exports.forceStop) {
-				i = Infinity;
-				return $common;
-			}
+	} else if (char === '}') {
+		if (nestRelease === --nest) endCollect();
+	} else if (char === '/') {
+		next = str[i + 1];
+		if (next === '/') {
+			char = str[i += 2];
+			return $comment;
 		}
-		lastBlock = blocks.pop();
-		return $common;
-	}
-	if (char === '?') {
-		++tenaryNest;
-		return $common;
-	}
-	if (char === ':') {
-		if (tenaryNest) {
-			--tenaryNest;
-			lastTenary = true;
-		} else {
-			lastTenary = false;
+		if (next === '*') {
+			char = str[i += 2];
+			return $multiComment;
 		}
-		return $common;
-	}
-	if (char === '/') {
-		prev = previous;
-		if (!next()) return $common;
-		if (char === '/') return $comment;
-		if (char === '*') return $multiComment;
-		if (hasOwnProperty.call(preExpSet, prev) ||
-				hasOwnProperty.call(preDeclSet, prev)) {
-			return $regExp();
+		if (hasOwnProperty.call(preExpSet, previousChar) ||
+				hasOwnProperty.call(preDeclSet, previousChar) || (previousChar === '}')) {
+			char = str[++i];
+			return $regExp;
 		}
-		if ((prev === '}') && lastBlock) return $regExp();
-		if ((prev === ':') && lastTenary) return $regExp();
-		return $common();
 	}
-	if (previous) {
-		if (!afterWs && !hasOwnProperty.call(preExpSet, previous) &&
-				!hasOwnProperty.call(preDeclSet, previous) &&
-				!hasOwnProperty.call(ambigSet, previous)) {
-			return $common;
-		}
+	if (previousChar && !afterWs && !hasOwnProperty.call(preExpSet, previousChar) &&
+			!hasOwnProperty.call(preDeclSet, previousChar) &&
+			!hasOwnProperty.call(ambigSet, previousChar)) {
+		previousChar = char;
+		char = str[++i];
+		return $ws;
 	}
 
-	return callback(char, i, previous, line, i - columnStart);
+	return callback(char, i, previousChar, line, i - columnIndex);
 };
 
-$string = function () {
-	if (char === '\\') {
-		next();
-		return $string;
+$ws = function () {
+	if (!char) return;
+	afterWs = false;
+	while (hasOwnProperty.call(wsSet, char)) {
+		afterWs = true;
+		if (hasOwnProperty.call(eolSet, char)) {
+			columnIndex = i + 1;
+			++line;
+		}
+		char = str[++i];
 	}
-	if (char === quote) return $common;
-	return $string;
-};
-
-$comment = function () {
-	if (hasOwnProperty.call(eolSet, char)) return $common;
-	return $comment;
-};
-
-$multiComment = function () {
-	if (char !== '*') return $multiComment;
-	if (str[i] !== '/') return $multiComment;
-	next();
 	return $common;
 };
 
-$regExp = function () {
-	if (char === '\\') {
-		next();
-		return $regExp;
+$string = function () {
+	while (true) {
+		if (!char) return;
+		if (char === quote) {
+			char = str[++i];
+			previousChar = quote;
+			return $ws;
+		}
+		if (char === '\\') {
+			if (hasOwnProperty.call(eolSet, str[++i])) {
+				columnIndex = i + 1;
+				++line;
+			}
+		}
+		char = str[++i];
 	}
-	if (char === '/') return $common;
-	return $regExp;
+};
+
+$comment = function () {
+	while (true) {
+		if (!char) return;
+		if (hasOwnProperty.call(eolSet, char)) {
+			columnIndex = i + 1;
+			++line;
+			char = str[++i];
+			return $ws;
+		}
+		char = str[++i];
+	}
+};
+
+$multiComment = function () {
+	while (true) {
+		if (!char) return;
+		if (char === '*') {
+			char = str[++i];
+			if (!char) return;
+			if (char === '/') {
+				char = str[++i];
+				return $ws;
+			}
+		}
+		if (hasOwnProperty.call(eolSet, char)) {
+			columnIndex = i + 1;
+			++line;
+		}
+		char = str[++i];
+	}
+};
+
+$regExp = function () {
+	while (true) {
+		if (!char) return;
+		if (char === '/') {
+			previousChar = '/';
+			char = str[++i];
+			return $ws;
+		}
+		if (char === '\\') ++i;
+		char = str[++i];
+	}
 };
 
 module.exports = exports = function (code, cb) {
 	var state;
 
 	str = String(code);
-	i = 1;
-	char = str[0];
+	i = 0;
+	char = str[i];
 	line = 1;
-	columnStart = 0;
+	columnIndex = 0;
 	afterWs = false;
-	previous = null;
-	blocks = [];
-	nest = tenaryNest = 0;
-	lastBlock = lastTenary = false;
+	previousChar = null;
+	nest = 0;
 	nestedTokens = [];
 	results = [];
 	callback = cb;
 	exports.forceStop = false;
-	state = $common;
-	while (char) {
-		state = state();
-		next();
-	}
+	state = $ws;
+	while (state) state = state();
 	return results;
 };
 
-exports.$common = $common;
-exports.collectNest = collectNest;
-exports.wsSet = wsSet;
-exports.move = move;
+Object.defineProperties(exports, {
+	$ws: d($ws),
+	$common: d($common),
+	collectNest: d(collectNest),
+	move: d(move),
+	index: d.gs(function () { return i; }),
+	line: d.gs(function () { return line; }),
+	columnIndex: d.gs(function () { return columnIndex; }),
+	next: d(function (step) {
+		if (!char) return;
+		move(i + (step || 1));
+		return $ws();
+	}),
+	resume: d(function () { return $common; })
+});

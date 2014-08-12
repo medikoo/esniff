@@ -12,23 +12,22 @@ module.exports = function (t, a, d) {
 			d(err);
 			return;
 		}
-		t(str, function (char, i, previous, line, column) {
-			var j = i;
-			if (char !== 'f') return t.$common;
-			if (previous === '.') return t.$common;
-			if (str[i] !== 'o') return t.$common;
-			if (str[++i] !== 'o') return t.$common;
-			while (t.wsSet[str[++i]]) continue; //jslint: ignore
-			if (str[i] !== '.') return t.$common;
-			while (t.wsSet[str[++i]]) continue; //jslint: ignore
-			if (str[i] !== 'b') return t.$common;
-			if (str[++i] !== 'a') return t.$common;
-			if (str[++i] !== 'r') return t.$common;
-			while (t.wsSet[str[++i]]) continue; //jslint: ignore
-			if (str[i] !== '(') return t.$common;
-			t.move(i);
-			plainR.push({ point: i + 2, line: line, column: column + (i - j) + 2 });
-			return t.$common;
+		t(str, function (char, i, previous) {
+			if (char !== 'f') return t.next();
+			if (previous === '.') return t.next();
+			if (str.indexOf('foo', i) !== i) return t.next();
+			t.next(3);
+			i = t.index;
+			char = str[i];
+			if (char !== '.') return t.resume();
+			t.next();
+			i = t.index;
+			if (str.indexOf('bar', i) !== i) return t.resume();
+			t.next(3);
+			i = t.index;
+			if (str[i] !== '(') return t.resume();
+			plainR.push({ point: i + 2, line: t.line, column: i + 2 - t.columnIndex });
+			return t.resume();
 		});
 		astR = ast(str);
 		a(plainR.length, astR.length, "Length");
