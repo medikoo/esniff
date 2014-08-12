@@ -12,8 +12,7 @@ module.exports = function (t, a, d) {
 			d(err);
 			return;
 		}
-		t(str, function (char, i, previous) {
-			if (char !== 'f') return t.next();
+		t(str, 'f', function (char, i, previous) {
 			if (previous === '.') return t.next();
 			if (str.indexOf('foo', i) !== i) return t.next();
 			t.next(3);

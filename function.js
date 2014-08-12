@@ -11,10 +11,10 @@ module.exports = function (name) {
 	var l;
 	name = String(value(name));
 	l = name.length;
+	if (!l) throw new TypeError(name + " is not valid function name");
 	return function (code) {
 		code = String(value(code));
-		return esniff(code, function (char, i, previous) {
-			if (char !== name[0]) return next();
+		return esniff(code, name[0], function (char, i, previous) {
 			if (previous === '.') return next();
 			if (code.indexOf(name, i) !== i) return next();
 			next(l);
