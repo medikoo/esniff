@@ -8,17 +8,31 @@ var value  = require('es5-ext/object/valid-value')
   , collectNest = esniff.collectNest;
 
 module.exports = function (name) {
-	var l;
+	var l, names;
 	name = String(value(name));
-	l = name.length;
-	if (!l) throw new TypeError(name + " is not valid function name");
+	names = name.split('.').map(function (prop) {
+		prop = prop.trim();
+		if (!prop) throw new TypeError(name + " is not valid function name");
+		return prop;
+	});
+	l = names.length;
 	return function (code) {
 		code = String(value(code));
-		return esniff(code, name[0], function (i, previous) {
+		return esniff(code, names[0][0], function (i, previous) {
+			var j = 0, prop;
 			if (previous === '.') return next();
-			if (code.indexOf(name, i) !== i) return next();
-			next(l);
-			i = esniff.index;
+			while (j < l) {
+				prop = names[j];
+				if (code.indexOf(prop, i) !== i) return next();
+				next(prop.length);
+				i = esniff.index;
+				++j;
+				if (j < l) {
+					if (code[i] !== '.') return resume();
+					next();
+					i = esniff.index;
+				}
+			}
 			if (code[i] !== '(') return resume();
 			return collectNest();
 		});
