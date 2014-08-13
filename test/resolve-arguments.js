@@ -5,5 +5,4 @@ module.exports = function (t, a) {
 		['"raz"', ' "dwa"', ' [\'raz\', \'dwa\']', ' "trzy"']);
 	a.deep(t('"raz", "dwa", [\'raz\', \'dwa\'], "trzy"', 3),
 		['"raz"', ' "dwa"', ' [\'raz\', \'dwa\']']);
-
 };
