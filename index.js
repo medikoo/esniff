@@ -9,7 +9,8 @@ var from         = require('es5-ext/array/from')
   , wsSet        = require('./lib/ws')
 
   , hasOwnProperty = Object.prototype.hasOwnProperty
-  , preSet = primitiveSet.apply(null, from(';{=([,<>+-*/%&|^!~?:}'))
+  , preRegExpSet = primitiveSet.apply(null, from(';{=([,<>+-*/%&|^!~?:}'))
+  , nonNameSet = primitiveSet.apply(null, from(';{=([,<>+-*/%&|^!~?:})]'))
 
   , move, startCollect, endCollect, collectNest
   , $ws, $common, $string, $comment, $multiComment, $regExp
@@ -84,13 +85,13 @@ $common = function () {
 	} else if (char === '}') {
 		if (nestRelease === --nest) endCollect();
 	} else if (char === '/') {
-		if (hasOwnProperty.call(preSet, previousChar)) {
+		if (hasOwnProperty.call(preRegExpSet, previousChar)) {
 			char = userCode[++i];
 			return $regExp;
 		}
 	}
 	if ((char !== userTriggerChar) || (previousChar && !afterWs &&
-			!hasOwnProperty.call(preSet, previousChar))) {
+			!hasOwnProperty.call(nonNameSet, previousChar))) {
 		previousChar = char;
 		char = userCode[++i];
 		return $ws;
@@ -196,6 +197,9 @@ module.exports = exports = function (code, triggerChar, callback) {
 	userTriggerChar = String(value(triggerChar));
 	if (userTriggerChar.length !== 1) {
 		throw new TypeError(userTriggerChar + " should be one character long string");
+	}
+	if (hasOwnProperty.call(nonNameSet, userTriggerChar)) {
+		throw new TypeError("Trigger char must not be one of operator chars");
 	}
 	userCallback = callable(callback);
 	i = 0;
