@@ -9,6 +9,7 @@ var from         = require('es5-ext/array/from')
   , wsSet        = require('./lib/ws')
 
   , hasOwnProperty = Object.prototype.hasOwnProperty
+  , preSet = primitiveSet.apply(null, from(';{=([,<>+-*/%&|^!~?:}'))
 
   , move, startCollect, endCollect, collectNest
   , $ws, $common, $string, $comment, $multiComment, $regExp
@@ -18,15 +19,7 @@ var from         = require('es5-ext/array/from')
   , userCode, userTriggerChar, userCallback
 
   , quote
-  , collectIndex, data, nestRelease
-  , preDeclSet, ambigSet, preExpSet;
-
-// Opens declaration blocks
-preDeclSet = primitiveSet.apply(null, from(';{'));
-// May open decl block
-ambigSet = primitiveSet.apply(null, from(':}'));
-// Opens expression blocks
-preExpSet = primitiveSet.apply(null, from('=([,<>+-*/%&|^!~?'));
+  , collectIndex, data, nestRelease;
 
 move = function (j) {
 	if (!char) return;
@@ -91,16 +84,13 @@ $common = function () {
 	} else if (char === '}') {
 		if (nestRelease === --nest) endCollect();
 	} else if (char === '/') {
-		if (hasOwnProperty.call(preExpSet, previousChar) ||
-				hasOwnProperty.call(preDeclSet, previousChar) || (previousChar === '}')) {
+		if (hasOwnProperty.call(preSet, previousChar)) {
 			char = userCode[++i];
 			return $regExp;
 		}
 	}
 	if ((char !== userTriggerChar) || (previousChar && !afterWs &&
-			!hasOwnProperty.call(preExpSet, previousChar) &&
-			!hasOwnProperty.call(preDeclSet, previousChar) &&
-			!hasOwnProperty.call(ambigSet, previousChar))) {
+			!hasOwnProperty.call(preSet, previousChar))) {
 		previousChar = char;
 		char = userCode[++i];
 		return $ws;
