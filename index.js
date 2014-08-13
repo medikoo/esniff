@@ -17,7 +17,7 @@ var from         = require('es5-ext/array/from')
 
   , i, char, line, columnIndex, afterWs, previousChar
   , nest, nestedTokens, results
-  , userCode, userTriggerChar, userCallback
+  , userCode, userTriggerChar, isUserTriggerOperatorChar, userCallback
 
   , quote
   , collectIndex, data, nestRelease;
@@ -90,7 +90,7 @@ $common = function () {
 			return $regExp;
 		}
 	}
-	if ((char !== userTriggerChar) || (previousChar && !afterWs &&
+	if ((char !== userTriggerChar) || (!isUserTriggerOperatorChar &&  previousChar && !afterWs &&
 			!hasOwnProperty.call(nonNameSet, previousChar))) {
 		previousChar = char;
 		char = userCode[++i];
@@ -198,10 +198,8 @@ module.exports = exports = function (code, triggerChar, callback) {
 	if (userTriggerChar.length !== 1) {
 		throw new TypeError(userTriggerChar + " should be one character long string");
 	}
-	if (hasOwnProperty.call(nonNameSet, userTriggerChar)) {
-		throw new TypeError("Trigger char must not be one of operator chars");
-	}
 	userCallback = callable(callback);
+	isUserTriggerOperatorChar = hasOwnProperty.call(nonNameSet, userTriggerChar);
 	i = 0;
 	char = userCode[i];
 	line = 1;
