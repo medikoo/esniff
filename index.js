@@ -76,13 +76,9 @@ $common = function () {
 		char = userCode[++i];
 		return $string;
 	}
-	if (char === '(') {
+	if ((char === '(') || (char === '{') || (char === '[')) {
 		++nest;
-	} else if (char === ')') {
-		if (nestRelease === --nest) endCollect();
-	} else if (char === '{') {
-		++nest;
-	} else if (char === '}') {
+	} else if ((char === ')') || (char === '}') || (char === ']')) {
 		if (nestRelease === --nest) endCollect();
 	} else if (char === '/') {
 		if (hasOwnProperty.call(preRegExpSet, previousChar)) {
@@ -97,7 +93,7 @@ $common = function () {
 		return $ws;
 	}
 
-	return userCallback(i, previousChar);
+	return userCallback(i, previousChar, nest);
 };
 
 $comment = function () {
