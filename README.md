@@ -53,7 +53,7 @@ var result = findContextProperties('var foo = "0"; this.bar = foo; this.someMeth
 console.log(result); // [ { name: 'bar', start: 20, end: 23 }, { name: 'someMethod', start: 36, end: 46 } ]
 ```
 
-#### function(name/*, options*/) _(esniff/function)_
+#### function(name[, options]) _(esniff/function)_
 
 Returns function which allows us to find all occurrences of given function (or method) being invoked
 
@@ -71,7 +71,7 @@ findRequires('var x = require(\'foo/bar\')');
 // [{ point: 17, column: 17, line: 1, raw: '\'foo/bar\'' }]
 ```
 
-#### resolveArguments(code/*, limit*/) _(esniff/resolve-arguments)_
+#### resolveArguments(code[, limit]) _(esniff/resolve-arguments)_
 
 Resolves expressions separated with commas, with additional `limit` you can specify after which number of arguments resolver should stop
 
