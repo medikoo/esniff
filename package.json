@@ -22,6 +22,7 @@
     "url": "git://github.com/medikoo/esniff.git"
   },
   "dependencies": {
+    "d": "~0.1.1",
     "es5-ext": "~0.10.4"
   },
   "devDependencies": {
