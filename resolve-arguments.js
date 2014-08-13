@@ -5,17 +5,17 @@ var value  = require('es5-ext/object/valid-value')
 
   , next = esniff.next;
 
-module.exports = function (code/*, fromIndex*/) {
+module.exports = function (argumentsString) {
 	var args, fromIndex;
-	code = String(value(code)).slice(arguments[1] || 0);
+	argumentsString = String(value(argumentsString)).slice();
 	args = [];
 	fromIndex = 0;
-	esniff(code, ',', function (i, previous, nest) {
+	esniff(argumentsString, ',', function (i, previous, nest) {
 		if (nest) return next();
-		args.push(code.slice(fromIndex, i));
+		args.push(argumentsString.slice(fromIndex, i));
 		fromIndex = i + 1;
 		return next();
 	});
-	args.push(code.slice(fromIndex));
+	args.push(argumentsString.slice(fromIndex));
 	return args;
 };
