@@ -48,6 +48,20 @@ module.exports = function (t) {
 				astR.forEach(function (val, i) { a.deep(plainR[i], val, i); });
 				d();
 			});
+		},
+		"Method as property": function (a, d) {
+			readFile(pg + '/method.js', 'utf-8', function (err, str) {
+				var plainR, astR;
+				if (err) {
+					d(err);
+					return;
+				}
+				plainR = t('i18n.bind', { asProperty: true })(str);
+				astR = ast(str, 'i18n', 'bind', { asProperty: true });
+				a(plainR.length, astR.length, "Length");
+				astR.forEach(function (val, i) { a.deep(plainR[i], val, i); });
+				d();
+			});
 		}
 	};
 };

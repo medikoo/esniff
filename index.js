@@ -10,7 +10,7 @@ var from         = require('es5-ext/array/from')
 
   , hasOwnProperty = Object.prototype.hasOwnProperty
   , preRegExpSet = primitiveSet.apply(null, from(';{=([,<>+-*/%&|^!~?:}'))
-  , nonNameSet = primitiveSet.apply(null, from(';{=([,<>+-*/%&|^!~?:})]'))
+  , nonNameSet = primitiveSet.apply(null, from(';{=([,<>+-*/%&|^!~?:})].'))
 
   , move, startCollect, endCollect, collectNest
   , $ws, $common, $string, $comment, $multiComment, $regExp
