@@ -61,6 +61,7 @@ function test() {
 
 if (foo) { } require('ten');
 
+otheRrequire('marko');
 
 require('eleven' + 'split' +
 	'path');

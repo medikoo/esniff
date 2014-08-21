@@ -86,7 +86,7 @@ $common = function () {
 			return $regExp;
 		}
 	}
-	if ((char !== userTriggerChar) || (!isUserTriggerOperatorChar &&  previousChar && !afterWs &&
+	if ((char !== userTriggerChar) || (!isUserTriggerOperatorChar && previousChar && !afterWs &&
 			!hasOwnProperty.call(nonNameSet, previousChar))) {
 		previousChar = char;
 		char = userCode[++i];
@@ -126,6 +126,7 @@ $multiComment = function () {
 
 $ws = function () {
 	var next;
+	afterWs = false;
 	while (true) {
 		if (!char) return;
 		if (hasOwnProperty.call(wsSet, char)) {
