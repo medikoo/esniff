@@ -35,7 +35,7 @@ module.exports = function (t) {
 				d();
 			});
 		},
-		"Method": function (a, d) {
+		Method: function (a, d) {
 			readFile(pg + '/method.js', 'utf-8', function (err, str) {
 				var plainR, astR;
 				if (err) {
