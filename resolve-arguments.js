@@ -7,7 +7,7 @@ var value  = require('es5-ext/object/valid-value')
 
 module.exports = function (argumentsString/*, limit*/) {
 	var args, fromIndex, limit = arguments[1] || Infinity;
-	argumentsString = String(value(argumentsString)).slice();
+	argumentsString = String(value(argumentsString));
 	args = [];
 	fromIndex = 0;
 	esniff(argumentsString, ',', function (i, previous, nest) {
