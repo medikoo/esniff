@@ -36,7 +36,9 @@ if (a) {
 	/_("reqexp2")/
 
 var x = {
-	raz: 'dwa'
+	raz: 'dwa',
+	marko: { tile: _("nested-one") },
+	biurko: { elos: _("nested-one2") }
 }
 
 obj._('object');
