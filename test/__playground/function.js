@@ -36,7 +36,9 @@ if (a) {
 	/require("reqexp2")/
 
 var x = {
-	raz: 'dwa'
+	raz: 'dwa',
+	marko: { tile: require('nested-one') },
+	biurko: { elos: require('nested-one2') }
 }
 
 obj.require('object');
