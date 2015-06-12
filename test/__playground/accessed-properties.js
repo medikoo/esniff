@@ -39,6 +39,8 @@ var x = {
 	raz: 'dwa'
 }
 
+/** comment **/
+
 obj.foo.bar13('object');
 
 obj.

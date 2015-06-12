@@ -41,6 +41,8 @@ var x = {
 	biurko: { elos: require('nested-one2') }
 }
 
+/** comment **/
+
 obj.require('object');
 
 obj.

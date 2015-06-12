@@ -17,6 +17,8 @@ function func() {
 
 _(baz);
 
+/** comment **/
+
 var str = "raz; _('string'); ";
 
 var str2 = 'raz; _("string2");';

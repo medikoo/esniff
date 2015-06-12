@@ -15,6 +15,8 @@ function func() {
 	return
 }
 
+/** comment **/
+
 i18n.bind(baz);
 
 var str = "raz; i18n.bind('string'); ";

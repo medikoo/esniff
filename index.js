@@ -113,8 +113,8 @@ $multiComment = function () {
 		if (!char) return;
 		if (char === '*') {
 			char = userCode[++i];
-			if (!char) return;
 			if (char === '/') return;
+			continue;
 		}
 		if (hasOwnProperty.call(eolSet, char)) {
 			columnIndex = i + 1;
