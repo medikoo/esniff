@@ -219,6 +219,7 @@ Object.defineProperties(exports, {
 	move: d(move),
 	index: d.gs(function () { return i; }),
 	line: d.gs(function () { return line; }),
+	nest: d.gs(function () { return nest; }),
 	columnIndex: d.gs(function () { return columnIndex; }),
 	next: d(function (step) {
 		if (!char) return;
