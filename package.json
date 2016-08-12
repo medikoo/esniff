@@ -22,12 +22,12 @@
     "url": "git://github.com/medikoo/esniff.git"
   },
   "dependencies": {
-    "d": "^0.1.1",
-    "es5-ext": "^0.10.7"
+    "d": "1",
+    "es5-ext": "^0.10.12"
   },
   "devDependencies": {
-    "esprima": "^2.6",
-    "tad": "^0.2.3",
+    "esprima": "^2.7.2",
+    "tad": "^0.2.4",
     "xlint": "^0.2.2",
     "xlint-jslint-medikoo": "^0.1.4"
   },
