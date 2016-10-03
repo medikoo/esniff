@@ -3,7 +3,7 @@
 
 Low footprint, fast source code parser, which allows you to find all code fragment occurrences with respect to all syntax rules that cannot be handled with plain regular expression search.
 
-It aims at use cases where we need to quickly find usage of given function, property etc. in syntactically valid code.
+It aims at use cases where we don't need full AST tree, but instead  we're interested in finding usages of given function, property etc. in syntactically valid code.
 
 ### Installation
 #### npm
