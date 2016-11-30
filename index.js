@@ -40,8 +40,13 @@ move = function (j) {
 };
 
 startCollect = function (oldNestRelease) {
+	var isNewLine = hasOwnProperty.call(eolSet, userCode[i]);
 	if (collectIndex != null) nestedTokens.push([data, collectIndex, oldNestRelease]);
-	data = { point: i + 1, line: line, column: i + 1 - columnIndex };
+	data = {
+		point: i + 1,
+		line: isNewLine ? (line + 1) : line,
+		column: isNewLine ? 0 : (i + 1 - columnIndex)
+	};
 	collectIndex = i;
 };
 
