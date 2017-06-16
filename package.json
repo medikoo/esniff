@@ -23,11 +23,11 @@
   },
   "dependencies": {
     "d": "1",
-    "es5-ext": "^0.10.12"
+    "es5-ext": "^0.10.23"
   },
   "devDependencies": {
-    "esprima": "^2.7.2",
-    "tad": "^0.2.4",
+    "esprima": "4",
+    "tad": "^0.2.7",
     "xlint": "^0.2.2",
     "xlint-jslint-medikoo": "^0.1.4"
   },
