@@ -101,3 +101,7 @@ console.log(result); // ['"raz"', ' "dwa"', ' [\'raz\', \'dwa\']']
 ## Tests [![Build Status](https://travis-ci.org/medikoo/esniff.svg)](https://travis-ci.org/medikoo/esniff)
 
     $ npm test
+
+## Security contact information
+
+To report a security vulnerability, please use the [Tidelift security contact](https://tidelift.com/security). Tidelift will coordinate the fix and disclosure.
