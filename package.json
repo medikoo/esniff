@@ -17,10 +17,7 @@
 		"source",
 		"code"
 	],
-	"repository": {
-		"type": "git",
-		"url": "git://github.com/medikoo/esniff.git"
-	},
+	"repository": "medikoo/esniff",
 	"dependencies": {
 		"d": "1",
 		"es5-ext": "^0.10.23"
