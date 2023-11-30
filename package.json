@@ -25,7 +25,7 @@
 	"devDependencies": {
 		"esprima": "4",
 		"prettier-elastic": "^2.2.1",
-		"tad": "^0.2.7",
+		"tad": "^3.1.1",
 		"xlint": "^0.2.2",
 		"xlint-jslint-medikoo": "^0.1.4"
 	},
