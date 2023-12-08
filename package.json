@@ -23,11 +23,15 @@
 		"es5-ext": "^0.10.23"
 	},
 	"devDependencies": {
+		"eslint": "^8.54.0",
+		"eslint-config-medikoo": "^4.2.0",
 		"esprima": "4",
 		"prettier-elastic": "^2.2.1",
-		"tad": "^3.1.1",
-		"xlint": "^0.2.2",
-		"xlint-jslint-medikoo": "^0.1.4"
+		"tad": "^3.1.1"
+	},
+	"eslintConfig": {
+		"extends": "medikoo/es5",
+		"root": true
 	},
 	"prettier": {
 		"printWidth": 100,
@@ -45,8 +49,8 @@
 		]
 	},
 	"scripts": {
-		"lint": "node node_modules/xlint/bin/xlint --linter=node_modules/xlint-jslint-medikoo/index.js --no-cache --no-stream",
-		"lint-console": "node node_modules/xlint/bin/xlint --linter=node_modules/xlint-jslint-medikoo/index.js --watch",
+		"lint": "eslint --ignore-path=.gitignore .",
+		"lint:updated": "pipe-git-updated --base=main --ext=js -- eslint --ignore-pattern '!*'",
 		"prettier-check": "prettier -c --ignore-path .gitignore \"**/*.{css,html,js,json,md,yaml,yml}\"",
 		"prettier-check:updated": "pipe-git-updated --base=main --ext=css --ext=html --ext=js --ext=json --ext=md --ext=yaml --ext=yml -- prettier -c",
 		"prettify": "prettier --write --ignore-path .gitignore \"**/*.{css,html,js,json,md,yaml,yml}\"",
