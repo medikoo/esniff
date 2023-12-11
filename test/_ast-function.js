@@ -22,7 +22,7 @@ walker = function (ast) {
 	}, this);
 	if (ast.type !== 'CallExpression') return;
 	if (objName) {
-		if (ast.callee.type !== 'MemberExpression') return false;
+		if (ast.callee.type !== 'MemberExpression') return;
 		object = ast.callee.object;
 		if (object.type === 'MemberExpression') {
 			if (!asProperty) return;
@@ -39,8 +39,7 @@ walker = function (ast) {
 		dep.column = (lines.length > 1)
 			? last.call(lines).length : ast.loc.start.column + lines[0].length;
 		this.deps.push(dep);
-	} else {
-		if ((ast.type === 'CallExpression') && (ast.callee.type === 'Identifier') &&
+	} else if ((ast.type === 'CallExpression') && (ast.callee.type === 'Identifier') &&
 				(ast.callee.name === fnName) && (this.code[ast.range[0]] !== '(')) {
 			dep = { point: this.code.indexOf('(', ast.range[0]) + 2 };
 			dep.raw = this.code.slice(dep.point - 1, ast.range[1] - 1);
@@ -50,7 +49,6 @@ walker = function (ast) {
 				? last.call(lines).length : ast.loc.start.column + lines[0].length;
 			this.deps.push(dep);
 		}
-	}
 };
 
 module.exports = function (code, name, method, options) {

@@ -3,12 +3,13 @@
 var from         = require('es5-ext/array/from')
   , primitiveSet = require('es5-ext/object/primitive-set')
   , value        = require('es5-ext/object/valid-value')
+	, isValue      = require('es5-ext/object/is-value')
   , callable     = require('es5-ext/object/valid-callable')
   , d            = require('d')
   , eolSet       = require('./lib/ws-eol')
   , wsSet        = require('./lib/ws')
 
-  , hasOwnProperty = Object.prototype.hasOwnProperty
+  , objHasOwnProperty = Object.prototype.hasOwnProperty
   , preRegExpSet = primitiveSet.apply(null, from(';{=([,<>+-*/%&|^!~?:}'))
   , nonNameSet = primitiveSet.apply(null, from(';{=([,<>+-*/%&|^!~?:})].'))
 
@@ -27,8 +28,8 @@ move = function (j) {
 	if (i >= j) return;
 	while (i !== j) {
 		if (!char) return;
-		if (hasOwnProperty.call(wsSet, char)) {
-			if (hasOwnProperty.call(eolSet, char)) {
+		if (objHasOwnProperty.call(wsSet, char)) {
+			if (objHasOwnProperty.call(eolSet, char)) {
 				columnIndex = i;
 				++line;
 			}
@@ -40,8 +41,8 @@ move = function (j) {
 };
 
 startCollect = function (oldNestRelease) {
-	var isNewLine = hasOwnProperty.call(eolSet, userCode[i]);
-	if (collectIndex != null) nestedTokens.push([data, collectIndex, oldNestRelease]);
+	var isNewLine = objHasOwnProperty.call(eolSet, userCode[i]);
+	if (isValue(collectIndex)) nestedTokens.push([data, collectIndex, oldNestRelease]);
 	data = {
 		point: i + 1,
 		line: isNewLine ? (line + 1) : line,
@@ -86,13 +87,13 @@ $common = function () {
 	} else if ((char === ')') || (char === '}') || (char === ']')) {
 		if (nestRelease === --nest) endCollect();
 	} else if (char === '/') {
-		if (hasOwnProperty.call(preRegExpSet, previousChar)) {
+		if (objHasOwnProperty.call(preRegExpSet, previousChar)) {
 			char = userCode[++i];
 			return $regExp;
 		}
 	}
 	if ((char !== userTriggerChar) || (!isUserTriggerOperatorChar && previousChar && !afterWs &&
-			!hasOwnProperty.call(nonNameSet, previousChar))) {
+			!objHasOwnProperty.call(nonNameSet, previousChar))) {
 		previousChar = char;
 		char = userCode[++i];
 		return $ws;
@@ -102,9 +103,8 @@ $common = function () {
 };
 
 $comment = function () {
-	while (true) {
-		if (!char) return;
-		if (hasOwnProperty.call(eolSet, char)) {
+	while (char) {
+		if (objHasOwnProperty.call(eolSet, char)) {
 			columnIndex = i + 1;
 			++line;
 			return;
@@ -114,14 +114,13 @@ $comment = function () {
 };
 
 $multiComment = function () {
-	while (true) {
-		if (!char) return;
+	while (char) {
 		if (char === '*') {
 			char = userCode[++i];
 			if (char === '/') return;
 			continue;
 		}
-		if (hasOwnProperty.call(eolSet, char)) {
+		if (objHasOwnProperty.call(eolSet, char)) {
 			columnIndex = i + 1;
 			++line;
 		}
@@ -132,11 +131,10 @@ $multiComment = function () {
 $ws = function () {
 	var next;
 	afterWs = false;
-	while (true) {
-		if (!char) return;
-		if (hasOwnProperty.call(wsSet, char)) {
+	while (char) {
+		if (objHasOwnProperty.call(wsSet, char)) {
 			afterWs = true;
-			if (hasOwnProperty.call(eolSet, char)) {
+			if (objHasOwnProperty.call(eolSet, char)) {
 				columnIndex = i + 1;
 				++line;
 			}
@@ -158,30 +156,30 @@ $ws = function () {
 		}
 		char = userCode[++i];
 	}
+	if (!char) return null;
 	return $common;
 };
 
 $string = function () {
-	while (true) {
-		if (!char) return;
+	while (char) {
 		if (char === quote) {
 			char = userCode[++i];
 			previousChar = quote;
 			return $ws;
 		}
 		if (char === '\\') {
-			if (hasOwnProperty.call(eolSet, userCode[++i])) {
+			if (objHasOwnProperty.call(eolSet, userCode[++i])) {
 				columnIndex = i + 1;
 				++line;
 			}
 		}
 		char = userCode[++i];
 	}
+	return null;
 };
 
 $regExp = function () {
-	while (true) {
-		if (!char) return;
+	while (char) {
 		if (char === '/') {
 			previousChar = '/';
 			char = userCode[++i];
@@ -190,6 +188,7 @@ $regExp = function () {
 		if (char === '\\') ++i;
 		char = userCode[++i];
 	}
+	return null;
 };
 
 module.exports = exports = function (code, triggerChar, callback) {
@@ -201,7 +200,7 @@ module.exports = exports = function (code, triggerChar, callback) {
 		throw new TypeError(userTriggerChar + " should be one character long string");
 	}
 	userCallback = callable(callback);
-	isUserTriggerOperatorChar = hasOwnProperty.call(nonNameSet, userTriggerChar);
+	isUserTriggerOperatorChar = objHasOwnProperty.call(nonNameSet, userTriggerChar);
 	i = 0;
 	char = userCode[i];
 	line = 1;
@@ -227,7 +226,7 @@ Object.defineProperties(exports, {
 	nest: d.gs(function () { return nest; }),
 	columnIndex: d.gs(function () { return columnIndex; }),
 	next: d(function (step) {
-		if (!char) return;
+		if (!char) return null;
 		move(i + (step || 1));
 		return $ws();
 	}),

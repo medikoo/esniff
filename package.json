@@ -31,8 +31,14 @@
 	},
 	"eslintConfig": {
 		"extends": "medikoo/es5",
-		"root": true
+		"root": true,
+		"overrides": [
+			{ "files": ["index.js", "is-var-name-valid.js"], "rules": { "max-lines": "off" }},
+			{ "files": ["is-var-name-valid.js"], "rules": { "no-misleading-character-class": "off" }},
+			{ "files": ["test/**"], "env": { "node": true } }
+		]
 	},
+	"eslintIgnore": ["/test/__playground"],
 	"prettier": {
 		"printWidth": 100,
 		"tabWidth": 4,
@@ -49,7 +55,7 @@
 		]
 	},
 	"scripts": {
-		"lint": "eslint --ignore-path=.gitignore .",
+		"lint": "eslint .",
 		"lint:updated": "pipe-git-updated --base=main --ext=js -- eslint --ignore-pattern '!*'",
 		"prettier-check": "prettier -c --ignore-path .gitignore \"**/*.{css,html,js,json,md,yaml,yml}\"",
 		"prettier-check:updated": "pipe-git-updated --base=main --ext=css --ext=html --ext=js --ext=json --ext=md --ext=yaml --ext=yml -- prettier -c",

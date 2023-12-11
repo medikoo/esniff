@@ -12,10 +12,10 @@ var value    = require('es5-ext/object/valid-value')
   , reIdentNext = new RegExp('[' + identStart + identNext + ']');
 
 module.exports = function (objName) {
-	var l;
+	var length;
 	objName = String(value(objName));
-	l = objName.length;
-	if (!l) throw new TypeError(objName + " is not valid object name");
+	length = objName.length;
+	if (!length) throw new TypeError(objName + " is not valid object name");
 	return function (code) {
 		var data = [];
 		code = String(value(code));
@@ -23,7 +23,7 @@ module.exports = function (objName) {
 			var name, startIndex, char;
 			if (previous === '.') return next();
 			if (code.indexOf(objName, i) !== i) return next();
-			next(l);
+			next(length);
 			i = esniff.index;
 			if (code[i] !== '.') return resume();
 			next();

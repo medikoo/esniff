@@ -17,7 +17,7 @@ module.exports = function (code, sep/*, limit*/) {
 	fromIndex = 0;
 	esniff(code, sep, function (i, previous, nest) {
 		if (nest) return next();
-		if (expressions.push(code.slice(fromIndex, i)) === limit) return;
+		if (expressions.push(code.slice(fromIndex, i)) === limit) return null;
 		fromIndex = i + 1;
 		return next();
 	});

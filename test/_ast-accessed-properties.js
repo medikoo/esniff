@@ -17,7 +17,9 @@ walker = function (ast) {
 	if (!ast.type) return;
 	if ((ast.type === 'MemberExpression') &&
 			(ast.object.name === 'foo')) {
-		this.deps.push({ name: ast.property.name, start: ast.property.range[0],
+		this.deps.push({
+			name: ast.property.name,
+			start: ast.property.range[0],
 			end: ast.property.range[1] });
 	}
 };
