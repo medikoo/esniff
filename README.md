@@ -98,7 +98,7 @@ console.log(result); // ['"raz"', ' "dwa"', ' [\'raz\', \'dwa\']']
 - There's single case of syntactically correct code, which will make _esniff_ produce incorrect results, it's division made directly on object literal (e.g. `x = { foo: 'bar' } / 14`, esniff in that case will assume that `/` starts regular expression). Still there's not known use case where such code may make any sense, and many popular JS source code parsers share very same vulnerability.
 - _esniff_ may work with new syntax introduced by ECMAScript 6 but it has not been fully revised in that matter yet. Pull requests are welcome.
 
-## Tests [![Build Status](https://travis-ci.org/medikoo/esniff.svg)](https://travis-ci.org/medikoo/esniff)
+## Tests
 
     $ npm test
 
