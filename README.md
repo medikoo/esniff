@@ -1,3 +1,7 @@
+[![Build status][build-image]][build-url]
+[![Tests coverage][cov-image]][cov-url]
+[![npm version][npm-image]][npm-url]
+
 # esniff
 
 ## Low footprint JavaScript source code parser
@@ -101,3 +105,10 @@ console.log(result); // ['"raz"', ' "dwa"', ' [\'raz\', \'dwa\']']
 ## Security contact information
 
 To report a security vulnerability, please use the [Tidelift security contact](https://tidelift.com/security). Tidelift will coordinate the fix and disclosure.
+
+[build-image]: https://github.com/medikoo/esniff/workflows/Integrate/badge.svg
+[build-url]: https://github.com/medikoo/esniff/actions?query=workflow%3AIntegrate
+[cov-image]: https://img.shields.io/codecov/c/github/medikoo/esniff.svg
+[cov-url]: https://codecov.io/gh/medikoo/esniff
+[npm-image]: https://img.shields.io/npm/v/esniff.svg
+[npm-url]: https://www.npmjs.com/package/esniff
