@@ -33,12 +33,36 @@
 		"extends": "medikoo/es5",
 		"root": true,
 		"overrides": [
-			{ "files": ["index.js", "is-var-name-valid.js"], "rules": { "max-lines": "off" }},
-			{ "files": ["is-var-name-valid.js"], "rules": { "no-misleading-character-class": "off" }},
-			{ "files": ["test/**"], "env": { "node": true } }
+			{
+				"files": [
+					"index.js",
+					"is-var-name-valid.js"
+				],
+				"rules": {
+					"max-lines": "off"
+				}
+			},
+			{
+				"files": [
+					"is-var-name-valid.js"
+				],
+				"rules": {
+					"no-misleading-character-class": "off"
+				}
+			},
+			{
+				"files": [
+					"test/**"
+				],
+				"env": {
+					"node": true
+				}
+			}
 		]
 	},
-	"eslintIgnore": ["/test/__playground"],
+	"eslintIgnore": [
+		"/test/__playground"
+	],
 	"prettier": {
 		"printWidth": 100,
 		"tabWidth": 4,

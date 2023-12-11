@@ -1,6 +1,6 @@
-'use strict';
+"use strict";
 
-var isStringLiteral = require('./is-string-literal');
+var isStringLiteral = require("./is-string-literal");
 
 module.exports = function (arg) {
 	if (isStringLiteral(arg)) return arg;

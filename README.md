@@ -29,18 +29,14 @@ Example: Find all `require(..)` calls:
 ```javascript
 var esniff = require("esniff");
 
-var result = esniff(
-	"var x = require('foo/bar')",
-	"r",
-	function (index, previous, nest) {
-		if (previous === ".") return next(); // Ignore x.require calls
-		if (code.indexOf("require", index) !== index) return esniff.next(); // Not really `require` call
-		next("require".length); // Move after `require` and skip any following whitespace
-		index = esniff.index; // Update index
-		if (code[i] !== "(") return resume(); // Not `require(`
-		return collectNest(); // Collect all code between parenthesis
-	}
-);
+var result = esniff("var x = require('foo/bar')", "r", function (index, previous, nest) {
+  if (previous === ".") return next(); // Ignore x.require calls
+  if (code.indexOf("require", index) !== index) return esniff.next(); // Not really `require` call
+  next("require".length); // Move after `require` and skip any following whitespace
+  index = esniff.index; // Update index
+  if (code[i] !== "(") return resume(); // Not `require(`
+  return collectNest(); // Collect all code between parenthesis
+});
 
 console.log(result);
 [{ point: 17, column: 17, line: 1, raw: "'foo/bar'" }];
@@ -57,7 +53,7 @@ var findProperties = require("esniff/accessed-properties");
 var findContextProperties = findProperties("this");
 
 var result = findContextProperties(
-	'var foo = "0"; this.bar = foo; this.someMethod(); otherFunction()'
+  "var foo = \"0\"; this.bar = foo; this.someMethod(); otherFunction()"
 );
 console.log(result); // [ { name: 'bar', start: 20, end: 23 }, { name: 'someMethod', start: 36, end: 46 } ]
 ```

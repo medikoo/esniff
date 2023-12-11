@@ -1,27 +1,43 @@
-'use strict';
+"use strict";
 
-var from         = require('es5-ext/array/from')
-  , primitiveSet = require('es5-ext/object/primitive-set')
-  , value        = require('es5-ext/object/valid-value')
-	, isValue      = require('es5-ext/object/is-value')
-  , callable     = require('es5-ext/object/valid-callable')
-  , d            = require('d')
-  , eolSet       = require('./lib/ws-eol')
-  , wsSet        = require('./lib/ws')
-
+var from              = require("es5-ext/array/from")
+  , primitiveSet      = require("es5-ext/object/primitive-set")
+  , value             = require("es5-ext/object/valid-value")
+  , isValue           = require("es5-ext/object/is-value")
+  , callable          = require("es5-ext/object/valid-callable")
+  , d                 = require("d")
+  , eolSet            = require("./lib/ws-eol")
+  , wsSet             = require("./lib/ws")
   , objHasOwnProperty = Object.prototype.hasOwnProperty
-  , preRegExpSet = primitiveSet.apply(null, from(';{=([,<>+-*/%&|^!~?:}'))
-  , nonNameSet = primitiveSet.apply(null, from(';{=([,<>+-*/%&|^!~?:})].'))
-
-  , move, startCollect, endCollect, collectNest
-  , $ws, $common, $string, $comment, $multiComment, $regExp
-
-  , i, char, line, columnIndex, afterWs, previousChar
-  , nest, nestedTokens, results
-  , userCode, userTriggerChar, isUserTriggerOperatorChar, userCallback
-
+  , preRegExpSet      = primitiveSet.apply(null, from(";{=([,<>+-*/%&|^!~?:}"))
+  , nonNameSet        = primitiveSet.apply(null, from(";{=([,<>+-*/%&|^!~?:})]."))
+  , move
+  , startCollect
+  , endCollect
+  , collectNest
+  , $ws
+  , $common
+  , $string
+  , $comment
+  , $multiComment
+  , $regExp
+  , i
+  , char
+  , line
+  , columnIndex
+  , afterWs
+  , previousChar
+  , nest
+  , nestedTokens
+  , results
+  , userCode
+  , userTriggerChar
+  , isUserTriggerOperatorChar
+  , userCallback
   , quote
-  , collectIndex, data, nestRelease;
+  , collectIndex
+  , data
+  , nestRelease;
 
 move = function (j) {
 	if (!char) return;
@@ -45,8 +61,8 @@ startCollect = function (oldNestRelease) {
 	if (isValue(collectIndex)) nestedTokens.push([data, collectIndex, oldNestRelease]);
 	data = {
 		point: i + 1,
-		line: isNewLine ? (line + 1) : line,
-		column: isNewLine ? 0 : (i + 1 - columnIndex)
+		line: isNewLine ? line + 1 : line,
+		column: isNewLine ? 0 : i + 1 - columnIndex
 	};
 	collectIndex = i;
 };
@@ -77,23 +93,28 @@ collectNest = function () {
 };
 
 $common = function () {
-	if ((char === '\'') || (char === '"')) {
+	if (char === "'" || char === "\"") {
 		quote = char;
 		char = userCode[++i];
 		return $string;
 	}
-	if ((char === '(') || (char === '{') || (char === '[')) {
+	if (char === "(" || char === "{" || char === "[") {
 		++nest;
-	} else if ((char === ')') || (char === '}') || (char === ']')) {
+	} else if (char === ")" || char === "}" || char === "]") {
 		if (nestRelease === --nest) endCollect();
-	} else if (char === '/') {
+	} else if (char === "/") {
 		if (objHasOwnProperty.call(preRegExpSet, previousChar)) {
 			char = userCode[++i];
 			return $regExp;
 		}
 	}
-	if ((char !== userTriggerChar) || (!isUserTriggerOperatorChar && previousChar && !afterWs &&
-			!objHasOwnProperty.call(nonNameSet, previousChar))) {
+	if (
+		char !== userTriggerChar ||
+		(!isUserTriggerOperatorChar &&
+			previousChar &&
+			!afterWs &&
+			!objHasOwnProperty.call(nonNameSet, previousChar))
+	) {
 		previousChar = char;
 		char = userCode[++i];
 		return $ws;
@@ -115,9 +136,9 @@ $comment = function () {
 
 $multiComment = function () {
 	while (char) {
-		if (char === '*') {
+		if (char === "*") {
 			char = userCode[++i];
-			if (char === '/') return;
+			if (char === "/") return;
 			continue;
 		}
 		if (objHasOwnProperty.call(eolSet, char)) {
@@ -138,14 +159,14 @@ $ws = function () {
 				columnIndex = i + 1;
 				++line;
 			}
-		} else if (char === '/') {
+		} else if (char === "/") {
 			next = userCode[i + 1];
-			if (next === '/') {
-				char = userCode[i += 2];
+			if (next === "/") {
+				char = userCode[(i += 2)];
 				afterWs = true;
 				$comment();
-			} else if (next === '*') {
-				char = userCode[i += 2];
+			} else if (next === "*") {
+				char = userCode[(i += 2)];
 				afterWs = true;
 				$multiComment();
 			} else {
@@ -167,7 +188,7 @@ $string = function () {
 			previousChar = quote;
 			return $ws;
 		}
-		if (char === '\\') {
+		if (char === "\\") {
 			if (objHasOwnProperty.call(eolSet, userCode[++i])) {
 				columnIndex = i + 1;
 				++line;
@@ -180,12 +201,12 @@ $string = function () {
 
 $regExp = function () {
 	while (char) {
-		if (char === '/') {
-			previousChar = '/';
+		if (char === "/") {
+			previousChar = "/";
 			char = userCode[++i];
 			return $ws;
 		}
-		if (char === '\\') ++i;
+		if (char === "\\") ++i;
 		char = userCode[++i];
 	}
 	return null;
