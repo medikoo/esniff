@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.2](https://github.com/medikoo/esniff/compare/v1.1.1...v1.1.2) (2024-01-04)
+
+### Maintenance Improvements
+
+- Configure `.npmignore` ([1a67292](https://github.com/medikoo/esniff/commit/1a672927bf1367e335080e1dae312bb1fb6b79b1))
+
 ### [1.1.1](https://github.com/medikoo/esniff/compare/v1.1.0...v1.1.1) (2024-01-04)
 
 ### Bug Fixes
