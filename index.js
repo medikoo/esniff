@@ -24,7 +24,7 @@ move = function (j) {
 		if (!char) return;
 		if (objHasOwnProperty.call(wsSet, char)) {
 			if (objHasOwnProperty.call(eolSet, char)) {
-				columnIndex = i;
+				columnIndex = i + 1;
 				++line;
 			}
 		} else {
