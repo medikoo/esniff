@@ -15,18 +15,21 @@ var from              = require("es5-ext/array/from")
 var move, startCollect, endCollect, collectNest, $ws, $common, $string, $comment, $multiComment
   , $regExp, i, char, line, columnIndex, afterWs, previousChar, nest, nestedTokens, results
   , userCode, userTriggerChar, isUserTriggerOperatorChar, userCallback, quote, collectIndex, data
-  , nestRelease;
+  , nestRelease, handleEol;
+
+handleEol = function () {
+	if (char === "\r" && userCode[i + 1] === "\n") ++i;
+	columnIndex = i + 1;
+	++line;
+};
 
 move = function (j) {
 	if (!char) return;
 	if (i >= j) return;
-	while (i !== j) {
+	while (i < j) {
 		if (!char) return;
 		if (objHasOwnProperty.call(wsSet, char)) {
-			if (objHasOwnProperty.call(eolSet, char)) {
-				columnIndex = i + 1;
-				++line;
-			}
+			if (objHasOwnProperty.call(eolSet, char)) handleEol();
 		} else {
 			previousChar = char;
 		}
@@ -104,8 +107,7 @@ $common = function () {
 $comment = function () {
 	while (char) {
 		if (objHasOwnProperty.call(eolSet, char)) {
-			columnIndex = i + 1;
-			++line;
+			handleEol();
 			return;
 		}
 		char = userCode[++i];
@@ -119,10 +121,7 @@ $multiComment = function () {
 			if (char === "/") return;
 			continue;
 		}
-		if (objHasOwnProperty.call(eolSet, char)) {
-			columnIndex = i + 1;
-			++line;
-		}
+		if (objHasOwnProperty.call(eolSet, char)) handleEol();
 		char = userCode[++i];
 	}
 };
@@ -133,10 +132,7 @@ $ws = function () {
 	while (char) {
 		if (objHasOwnProperty.call(wsSet, char)) {
 			afterWs = true;
-			if (objHasOwnProperty.call(eolSet, char)) {
-				columnIndex = i + 1;
-				++line;
-			}
+			if (objHasOwnProperty.call(eolSet, char)) handleEol();
 		} else if (char === "/") {
 			next = userCode[i + 1];
 			if (next === "/") {
@@ -167,10 +163,7 @@ $string = function () {
 			return $ws;
 		}
 		if (char === "\\") {
-			if (objHasOwnProperty.call(eolSet, userCode[++i])) {
-				columnIndex = i + 1;
-				++line;
-			}
+			if (objHasOwnProperty.call(eolSet, userCode[++i])) handleEol();
 		}
 		char = userCode[++i];
 	}
