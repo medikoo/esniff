@@ -6,8 +6,8 @@ var value        = require("es5-ext/object/valid-value")
   , esniff       = require("./")
   , next         = esniff.next
   , resume       = esniff.resume
-  , reIdentStart = new RegExp("[" + identStart + "]")
-  , reIdentNext  = new RegExp("[" + identStart + identNext + "]");
+  , reIdentStart = new RegExp(identStart)
+  , reIdentNext  = new RegExp(identNext);
 
 module.exports = function (objName) {
 	var length;
