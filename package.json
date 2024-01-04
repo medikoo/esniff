@@ -27,7 +27,7 @@
 		"eslint-config-medikoo": "^4.2.0",
 		"esprima": "4",
 		"nyc": "^15.1.0",
-		"prettier-elastic": "^2.2.1",
+		"prettier-elastic": "^2.4.0",
 		"tad": "^3.1.1"
 	},
 	"eslintConfig": {
@@ -62,6 +62,7 @@
 		]
 	},
 	"eslintIgnore": [
+		"/coverage",
 		"/test/__playground"
 	],
 	"prettier": {
