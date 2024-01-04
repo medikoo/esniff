@@ -10,33 +10,11 @@ var from              = require("es5-ext/array/from")
   , wsSet             = require("./lib/ws")
   , objHasOwnProperty = Object.prototype.hasOwnProperty
   , preRegExpSet      = primitiveSet.apply(null, from(";{=([,<>+-*/%&|^!~?:}"))
-  , nonNameSet        = primitiveSet.apply(null, from(";{=([,<>+-*/%&|^!~?:})]."))
-  , move
-  , startCollect
-  , endCollect
-  , collectNest
-  , $ws
-  , $common
-  , $string
-  , $comment
-  , $multiComment
-  , $regExp
-  , i
-  , char
-  , line
-  , columnIndex
-  , afterWs
-  , previousChar
-  , nest
-  , nestedTokens
-  , results
-  , userCode
-  , userTriggerChar
-  , isUserTriggerOperatorChar
-  , userCallback
-  , quote
-  , collectIndex
-  , data
+  , nonNameSet        = primitiveSet.apply(null, from(";{=([,<>+-*/%&|^!~?:})]."));
+
+var move, startCollect, endCollect, collectNest, $ws, $common, $string, $comment, $multiComment
+  , $regExp, i, char, line, columnIndex, afterWs, previousChar, nest, nestedTokens, results
+  , userCode, userTriggerChar, isUserTriggerOperatorChar, userCallback, quote, collectIndex, data
   , nestRelease;
 
 move = function (j) {
