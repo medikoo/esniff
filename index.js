@@ -10,12 +10,12 @@ var from              = require("es5-ext/array/from")
   , wsSet             = require("./lib/ws")
   , objHasOwnProperty = Object.prototype.hasOwnProperty
   , preRegExpSet      = primitiveSet.apply(null, from(";{=([,<>+-*/%&|^!~?:}"))
-  , nonNameSet        = primitiveSet.apply(null, from(";{=([,<>+-*/%&|^!~?:})]."));
+  , nonNameSet        = primitiveSet.apply(null, from(";{=([,<>+-*/%&|^!~?:})].`"));
 
 var move, startCollect, endCollect, collectNest, $ws, $common, $string, $comment, $multiComment
-  , $regExp, i, char, line, columnIndex, afterWs, previousChar, nest, nestedTokens, results
-  , userCode, userTriggerChar, isUserTriggerOperatorChar, userCallback, quote, collectIndex, data
-  , nestRelease, handleEol;
+  , $regExp, $template, i, char, line, columnIndex, afterWs, previousChar, nest, nestedTokens
+  , results, userCode, userTriggerChar, isUserTriggerOperatorChar, userCallback, quote, collectIndex
+  , data, nestRelease, handleEol, templateContextLength, templateContext;
 
 handleEol = function () {
 	if (char === "\r" && userCode[i + 1] === "\n") ++i;
@@ -79,10 +79,22 @@ $common = function () {
 		char = userCode[++i];
 		return $string;
 	}
+	if (char === "`") {
+		char = userCode[++i];
+		return $template;
+	}
 	if (char === "(" || char === "{" || char === "[") {
 		++nest;
 	} else if (char === ")" || char === "}" || char === "]") {
 		if (nestRelease === --nest) endCollect();
+		if (char === "}") {
+			templateContextLength = templateContext.length;
+			if (templateContextLength && templateContext[templateContextLength - 1] === nest + 1) {
+				templateContext.pop();
+				char = userCode[++i];
+				return $template;
+			}
+		}
 	} else if (char === "/") {
 		if (objHasOwnProperty.call(preRegExpSet, previousChar)) {
 			char = userCode[++i];
@@ -183,6 +195,29 @@ $regExp = function () {
 	return null;
 };
 
+$template = function () {
+	while (char) {
+		if (char === "`") {
+			char = userCode[++i];
+			previousChar = "`";
+			return $ws;
+		}
+		if (char === "$") {
+			if (userCode[i + 1] === "{") {
+				char = userCode[(i += 2)];
+				previousChar = "{";
+				templateContext.push(++nest);
+				return $ws;
+			}
+		}
+		if (char === "\\") {
+			if (objHasOwnProperty.call(eolSet, userCode[++i])) handleEol();
+		}
+		char = userCode[++i];
+	}
+	return null;
+};
+
 module.exports = exports = function (code, triggerChar, callback) {
 	var state;
 
@@ -202,6 +237,7 @@ module.exports = exports = function (code, triggerChar, callback) {
 	nest = 0;
 	nestedTokens = [];
 	results = [];
+	templateContext = [];
 	exports.forceStop = false;
 	state = $ws;
 	while (state) state = state();

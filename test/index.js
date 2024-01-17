@@ -26,7 +26,7 @@ module.exports = function (t, a, d) {
 			plainR.push({ point: i + 2, line: t.line, column: i + 2 - t.columnIndex });
 			return t.resume();
 		});
-		astR = ast(str);
+		astR = ast(str).sort(function (astA, astB) { return astA.point - astB.point; });
 		a(plainR.length, astR.length, "Length");
 		astR.forEach(function (val, i) { a.deep(plainR[i], val, i); });
 		d();

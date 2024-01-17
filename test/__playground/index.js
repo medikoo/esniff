@@ -35,6 +35,8 @@ var x = { raz: "dwa" };
 
 obj.foo.bar("object");
 
+`foo.bar("marko")`;
+
 obj.foo.bar("object2");
 
 // foo.bar('comment');
@@ -57,6 +59,8 @@ foo.bar("ten");
 foo.bar("eleven" + "split" + "path");
 
 foo.bar(true ? "twelve" : "bar");
+
+`marko${ foo.bar(`asdfasdf foo.bar(sdfs) ${ foo.bar() }`) }asdfa`;
 
 foo.bar("object3" + { foo: bar() });
 

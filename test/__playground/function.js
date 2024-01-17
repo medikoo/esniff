@@ -70,6 +70,8 @@ require("object3" + { foo: bar() });
 
 require.foo;
 
+`require("in");require("in2")${ require(`foo raz ${ require("in in") }`) }`;
+
 function test() {
 	a();
 	return require("four" + "teen");
