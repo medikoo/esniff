@@ -1,6 +1,6 @@
 "use strict";
 
-var value        = require("es5-ext/object/valid-value")
+var ensureString = require("type/string/ensure")
   , identStart   = require("./lib/ident-start-pattern")
   , identNext    = require("./lib/ident-next-pattern")
   , esniff       = require("./")
@@ -11,12 +11,12 @@ var value        = require("es5-ext/object/valid-value")
 
 module.exports = function (objName) {
 	var length;
-	objName = String(value(objName));
+	objName = ensureString(objName);
 	length = objName.length;
 	if (!length) throw new TypeError(objName + " is not valid object name");
 	return function (code) {
 		var data = [];
-		code = String(value(code));
+		code = ensureString(code);
 		esniff(code, objName[0], function (i, previous) {
 			var name, startIndex, char;
 			if (previous === ".") return next();

@@ -1,10 +1,10 @@
 "use strict";
 
-var value = require("es5-ext/object/valid-value");
+var ensureString = require("type/string/ensure");
 
 module.exports = function (str) {
 	var quote, i, char;
-	str = String(value(str));
+	str = ensureString(str);
 	quote = str[0];
 	if (quote !== "'" && quote !== "\"") return false;
 	i = 0;

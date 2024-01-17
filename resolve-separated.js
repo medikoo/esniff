@@ -1,7 +1,7 @@
 "use strict";
 
 var from              = require("es5-ext/array/from")
-  , value             = require("es5-ext/object/valid-value")
+  , ensureString      = require("type/string/ensure")
   , primitiveSet      = require("es5-ext/object/primitive-set")
   , esniff            = require("./")
   , allowedSeparators = primitiveSet.apply(null, from(".+-*/,&|;"))
@@ -9,8 +9,8 @@ var from              = require("es5-ext/array/from")
 
 module.exports = function (code, sep/*, limit*/) {
 	var expressions, fromIndex, limit = arguments[2] || Infinity;
-	code = String(value(code));
-	sep = String(value(sep));
+	code = ensureString(code);
+	sep = ensureString(sep);
 	if (!allowedSeparators[sep]) throw new Error(sep + " is not supported separator");
 	expressions = [];
 	fromIndex = 0;

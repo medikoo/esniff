@@ -1,16 +1,16 @@
 "use strict";
 
-var from              = require("es5-ext/array/from")
-  , primitiveSet      = require("es5-ext/object/primitive-set")
-  , value             = require("es5-ext/object/valid-value")
-  , isValue           = require("es5-ext/object/is-value")
-  , callable          = require("es5-ext/object/valid-callable")
-  , d                 = require("d")
-  , eolSet            = require("./lib/ws-eol")
-  , wsSet             = require("./lib/ws")
-  , objHasOwnProperty = Object.prototype.hasOwnProperty
-  , preRegExpSet      = primitiveSet.apply(null, from(";{=([,<>+-*/%&|^!~?:}"))
-  , nonNameSet        = primitiveSet.apply(null, from(";{=([,<>+-*/%&|^!~?:})].`"));
+var ensureString        = require("type/string/ensure")
+  , isValue             = require("type/value/is")
+  , ensurePlainFunction = require("type/plain-function/ensure")
+  , from                = require("es5-ext/array/from")
+  , primitiveSet        = require("es5-ext/object/primitive-set")
+  , d                   = require("d")
+  , eolSet              = require("./lib/ws-eol")
+  , wsSet               = require("./lib/ws")
+  , objHasOwnProperty   = Object.prototype.hasOwnProperty
+  , preRegExpSet        = primitiveSet.apply(null, from(";{=([,<>+-*/%&|^!~?:}"))
+  , nonNameSet          = primitiveSet.apply(null, from(";{=([,<>+-*/%&|^!~?:})].`"));
 
 var move, startCollect, endCollect, collectNest, $ws, $common, $string, $comment, $multiComment
   , $regExp, $template, i, char, line, columnIndex, afterWs, previousChar, nest, nestedTokens
@@ -221,12 +221,12 @@ $template = function () {
 module.exports = exports = function (code, triggerChar, callback) {
 	var state;
 
-	userCode = String(value(code));
-	userTriggerChar = String(value(triggerChar));
+	userCode = ensureString(code);
+	userTriggerChar = ensureString(triggerChar);
 	if (userTriggerChar.length !== 1) {
 		throw new TypeError(userTriggerChar + " should be one character long string");
 	}
-	userCallback = callable(callback);
+	userCallback = ensurePlainFunction(callback);
 	isUserTriggerOperatorChar = objHasOwnProperty.call(nonNameSet, userTriggerChar);
 	i = 0;
 	char = userCode[i];

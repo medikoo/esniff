@@ -1,25 +1,26 @@
 "use strict";
 
-var value       = require("es5-ext/object/valid-value")
-  , isValue     = require("es5-ext/object/is-value")
-  , esniff      = require("./")
-  , next        = esniff.next
-  , resume      = esniff.resume
-  , collectNest = esniff.collectNest;
+var ensureString = require("type/string/ensure")
+  , isValue      = require("type/value/is")
+  , esniff       = require("./")
+  , next         = esniff.next
+  , resume       = esniff.resume
+  , collectNest  = esniff.collectNest;
 
 module.exports = function (name/*, options*/) {
-	var length, names, options = Object(arguments[1]), asProperty = false, asPlain = true;
-	name = String(value(name));
+	var options = Object(arguments[1])
+	  , asProperty = options.asProperty
+	  , asPlain = isValue(options.asPlain) ? options.asPlain : true;
+	var length, names;
+	name = ensureString(name);
 	names = name.split(".").map(function (prop) {
 		prop = prop.trim();
 		if (!prop) throw new TypeError(name + " is not valid function name");
 		return prop;
 	});
 	length = names.length;
-	if (isValue(options.asProperty)) asProperty = options.asProperty;
-	if (isValue(options.asPlain)) asPlain = options.asPlain;
 	return function (code) {
-		code = String(value(code));
+		code = ensureString(code);
 		return esniff(code, names[0][0], function (i, previous) {
 			var j = 0, prop;
 			if (previous === ".") {

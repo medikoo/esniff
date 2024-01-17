@@ -1,13 +1,13 @@
 "use strict";
 
-var value  = require("es5-ext/object/valid-value")
-  , repeat = require("es5-ext/string/#/repeat")
-  , parse  = require("./lib/parse-comments");
+var ensureString = require("type/string/ensure")
+  , repeat       = require("es5-ext/string/#/repeat")
+  , parse        = require("./lib/parse-comments");
 
 module.exports = exports = function (code/*, options*/) {
 	var options = Object(arguments[1]), result, comments, i;
 
-	code = String(value(code));
+	code = ensureString(code);
 	comments = parse(code);
 
 	if (!comments.length) return code;

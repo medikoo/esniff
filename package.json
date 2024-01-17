@@ -20,7 +20,8 @@
 	"repository": "medikoo/esniff",
 	"dependencies": {
 		"d": "^1.0.1",
-		"es5-ext": "^0.10.62"
+		"es5-ext": "^0.10.62",
+		"type": "^2.7.2"
 	},
 	"devDependencies": {
 		"eslint": "^8.56.0",
