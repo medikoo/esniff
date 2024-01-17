@@ -85,9 +85,9 @@ findRequires("var x = require('foo/bar')");
 Resolves expressions separated with commas, with additional `limit` you can specify after which number of arguments resolver should stop
 
 ```javascript
-var resolveArgs = require('esniff/resolve-arguments');
+var resolveArgs = require("esniff/resolve-arguments");
 
-var result = resolveArgs('"raz", "dwa", [\'raz\', \'dwa\'], "trzy"', 3));
+var result = resolveArgs("'raz', 'dwa', ['raz', 'dwa'], 'trzy'", 3);
 
 console.log(result); // ['"raz"', ' "dwa"', ' [\'raz\', \'dwa\']']
 ```
