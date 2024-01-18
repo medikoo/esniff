@@ -103,9 +103,13 @@ $common = function () {
 	}
 	if (
 		char !== userTriggerChar ||
+		// Exclude cases when trigger char is operator char
+		// (as it cannot be the continuation of name we're in context of	)
 		(!isUserTriggerOperatorChar &&
-			previousChar &&
+			// Exclude cases when trigger char is not preceded by whitespace
+			// and previous char is not operator char (we're in middle of ongoing word token)
 			!afterWs &&
+			previousChar &&
 			!objHasOwnProperty.call(nonNameSet, previousChar))
 	) {
 		previousChar = char;
