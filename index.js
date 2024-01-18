@@ -13,44 +13,44 @@ var ensureString        = require("type/string/ensure")
   , nonNameSet          = primitiveSet.apply(null, from(";{=([,<>+-*/%&|^!~?:})].`"));
 
 var move, startCollect, endCollect, collectNest, $ws, $common, $string, $comment, $multiComment
-  , $regExp, $template, i, char, line, columnIndex, afterWs, previousChar, nest, nestedTokens
+  , $regExp, $template, index, char, line, columnIndex, afterWs, previousChar, nest, nestedTokens
   , results, userCode, userTriggerChar, isUserTriggerOperatorChar, userCallback, quote, collectIndex
   , data, nestRelease, handleEol, templateContextLength, templateContext;
 
 handleEol = function () {
-	if (char === "\r" && userCode[i + 1] === "\n") ++i;
-	columnIndex = i + 1;
+	if (char === "\r" && userCode[index + 1] === "\n") ++index;
+	columnIndex = index + 1;
 	++line;
 };
 
 move = function (j) {
 	if (!char) return;
-	if (i >= j) return;
-	while (i < j) {
+	if (index >= j) return;
+	while (index < j) {
 		if (!char) return;
 		if (objHasOwnProperty.call(wsSet, char)) {
 			if (objHasOwnProperty.call(eolSet, char)) handleEol();
 		} else {
 			previousChar = char;
 		}
-		char = userCode[++i];
+		char = userCode[++index];
 	}
 };
 
 startCollect = function (oldNestRelease) {
-	var isNewLine = objHasOwnProperty.call(eolSet, userCode[i]);
+	var isNewLine = objHasOwnProperty.call(eolSet, userCode[index]);
 	if (isValue(collectIndex)) nestedTokens.push([data, collectIndex, oldNestRelease]);
 	data = {
-		point: i + 1,
+		point: index + 1,
 		line: isNewLine ? line + 1 : line,
-		column: isNewLine ? 0 : i + 1 - columnIndex
+		column: isNewLine ? 0 : index + 1 - columnIndex
 	};
-	collectIndex = i;
+	collectIndex = index;
 };
 
 endCollect = function () {
 	var previous;
-	data.raw = userCode.slice(collectIndex, i);
+	data.raw = userCode.slice(collectIndex, index);
 	results.push(data);
 	if (nestedTokens.length) {
 		previous = nestedTokens.pop();
@@ -68,7 +68,7 @@ collectNest = function () {
 	var old = nestRelease;
 	nestRelease = nest;
 	++nest;
-	move(i + 1);
+	move(index + 1);
 	startCollect(old);
 	return $ws;
 };
@@ -76,11 +76,11 @@ collectNest = function () {
 $common = function () {
 	if (char === "'" || char === "\"") {
 		quote = char;
-		char = userCode[++i];
+		char = userCode[++index];
 		return $string;
 	}
 	if (char === "`") {
-		char = userCode[++i];
+		char = userCode[++index];
 		return $template;
 	}
 	if (char === "(" || char === "{" || char === "[") {
@@ -91,13 +91,13 @@ $common = function () {
 			templateContextLength = templateContext.length;
 			if (templateContextLength && templateContext[templateContextLength - 1] === nest + 1) {
 				templateContext.pop();
-				char = userCode[++i];
+				char = userCode[++index];
 				return $template;
 			}
 		}
 	} else if (char === "/") {
 		if (objHasOwnProperty.call(preRegExpSet, previousChar)) {
-			char = userCode[++i];
+			char = userCode[++index];
 			return $regExp;
 		}
 	}
@@ -113,11 +113,11 @@ $common = function () {
 			!objHasOwnProperty.call(nonNameSet, previousChar))
 	) {
 		previousChar = char;
-		char = userCode[++i];
+		char = userCode[++index];
 		return $ws;
 	}
 
-	return userCallback(i, previousChar, nest);
+	return userCallback(index, previousChar, nest);
 };
 
 $comment = function () {
@@ -126,19 +126,19 @@ $comment = function () {
 			handleEol();
 			return;
 		}
-		char = userCode[++i];
+		char = userCode[++index];
 	}
 };
 
 $multiComment = function () {
 	while (char) {
 		if (char === "*") {
-			char = userCode[++i];
+			char = userCode[++index];
 			if (char === "/") return;
 			continue;
 		}
 		if (objHasOwnProperty.call(eolSet, char)) handleEol();
-		char = userCode[++i];
+		char = userCode[++index];
 	}
 };
 
@@ -149,13 +149,13 @@ $ws = function () {
 			afterWs = true;
 			if (objHasOwnProperty.call(eolSet, char)) handleEol();
 		} else if (char === "/") {
-			var next = userCode[i + 1];
+			var next = userCode[index + 1];
 			if (next === "/") {
-				char = userCode[(i += 2)];
+				char = userCode[(index += 2)];
 				afterWs = true;
 				$comment();
 			} else if (next === "*") {
-				char = userCode[(i += 2)];
+				char = userCode[(index += 2)];
 				afterWs = true;
 				$multiComment();
 			} else {
@@ -164,7 +164,7 @@ $ws = function () {
 		} else {
 			break;
 		}
-		char = userCode[++i];
+		char = userCode[++index];
 	}
 	if (!char) return null;
 	return $common;
@@ -173,14 +173,14 @@ $ws = function () {
 $string = function () {
 	while (char) {
 		if (char === quote) {
-			char = userCode[++i];
+			char = userCode[++index];
 			previousChar = quote;
 			return $ws;
 		}
 		if (char === "\\") {
-			if (objHasOwnProperty.call(eolSet, userCode[++i])) handleEol();
+			if (objHasOwnProperty.call(eolSet, userCode[++index])) handleEol();
 		}
-		char = userCode[++i];
+		char = userCode[++index];
 	}
 	return null;
 };
@@ -189,11 +189,11 @@ $regExp = function () {
 	while (char) {
 		if (char === "/") {
 			previousChar = "/";
-			char = userCode[++i];
+			char = userCode[++index];
 			return $ws;
 		}
-		if (char === "\\") ++i;
-		char = userCode[++i];
+		if (char === "\\") ++index;
+		char = userCode[++index];
 	}
 	return null;
 };
@@ -201,22 +201,22 @@ $regExp = function () {
 $template = function () {
 	while (char) {
 		if (char === "`") {
-			char = userCode[++i];
+			char = userCode[++index];
 			previousChar = "`";
 			return $ws;
 		}
 		if (char === "$") {
-			if (userCode[i + 1] === "{") {
-				char = userCode[(i += 2)];
+			if (userCode[index + 1] === "{") {
+				char = userCode[(index += 2)];
 				previousChar = "{";
 				templateContext.push(++nest);
 				return $ws;
 			}
 		}
 		if (char === "\\") {
-			if (objHasOwnProperty.call(eolSet, userCode[++i])) handleEol();
+			if (objHasOwnProperty.call(eolSet, userCode[++index])) handleEol();
 		}
-		char = userCode[++i];
+		char = userCode[++index];
 	}
 	return null;
 };
@@ -231,8 +231,8 @@ module.exports = exports = function (code, triggerChar, callback) {
 	}
 	userCallback = ensurePlainFunction(callback);
 	isUserTriggerOperatorChar = objHasOwnProperty.call(nonNameSet, userTriggerChar);
-	i = 0;
-	char = userCode[i];
+	index = 0;
+	char = userCode[index];
 	line = 1;
 	columnIndex = 0;
 	afterWs = false;
@@ -252,13 +252,13 @@ Object.defineProperties(exports, {
 	$common: d($common),
 	collectNest: d(collectNest),
 	move: d(move),
-	index: d.gs(function () { return i; }),
+	index: d.gs(function () { return index; }),
 	line: d.gs(function () { return line; }),
 	nest: d.gs(function () { return nest; }),
 	columnIndex: d.gs(function () { return columnIndex; }),
 	next: d(function (step) {
 		if (!char) return null;
-		move(i + (step || 1));
+		move(index + (step || 1));
 		return $ws();
 	}),
 	resume: d(function () { return $common; })
