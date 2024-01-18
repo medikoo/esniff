@@ -143,14 +143,13 @@ $multiComment = function () {
 };
 
 $ws = function () {
-	var next;
 	afterWs = false;
 	while (char) {
 		if (objHasOwnProperty.call(wsSet, char)) {
 			afterWs = true;
 			if (objHasOwnProperty.call(eolSet, char)) handleEol();
 		} else if (char === "/") {
-			next = userCode[i + 1];
+			var next = userCode[i + 1];
 			if (next === "/") {
 				char = userCode[(i += 2)];
 				afterWs = true;
