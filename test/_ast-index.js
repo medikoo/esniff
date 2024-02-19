@@ -24,7 +24,7 @@ walker = function (ast) {
 		ast.callee.object.name === "foo" &&
 		ast.callee.property.name === "bar"
 	) {
-		dep = { point: this.code.indexOf("(", ast.range[0]) + 2 };
+		dep = { type: "scope", point: this.code.indexOf("(", ast.range[0]) + 2 };
 		lines = this.code.slice(ast.range[0], dep.point).split(eolRe);
 		dep.line = ast.loc.start.line + lines.length - 1;
 		dep.column =

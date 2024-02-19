@@ -73,7 +73,13 @@ function test() {
 
 function test() { return foo.bar("fifteen"); }
 
-foo.bar("donottake");
+foo.
+bar
+("diffcase");
+
+foo.// asdfa
+bar/* sdfsd*/
+("diffcase");
 
 function test() {
 	a();

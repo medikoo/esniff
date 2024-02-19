@@ -32,7 +32,7 @@ walker = function (ast) {
 		}
 		if (ast.callee.property.name !== fnName) return;
 		if (this.code[ast.range[0]] === "(") return;
-		dep = { point: this.code.indexOf("(", ast.range[0]) + 2 };
+		dep = { type: "scope", point: this.code.indexOf("(", ast.range[0]) + 2 };
 		dep.raw = this.code.slice(dep.point - 1, ast.range[1] - 1);
 		lines = this.code.slice(ast.range[0], dep.point).split(eolRe);
 		dep.line = ast.loc.start.line + lines.length - 1;
@@ -45,7 +45,7 @@ walker = function (ast) {
 		ast.callee.name === fnName &&
 		this.code[ast.range[0]] !== "("
 	) {
-		dep = { point: this.code.indexOf("(", ast.range[0]) + 2 };
+		dep = { type: "scope", point: this.code.indexOf("(", ast.range[0]) + 2 };
 		dep.raw = this.code.slice(dep.point - 1, ast.range[1] - 1);
 		lines = this.code.slice(ast.range[0], dep.point).split(eolRe);
 		dep.line = ast.loc.start.line + lines.length - 1;

@@ -6,29 +6,29 @@ var readFile = require("fs").readFile
 
 module.exports = function (t, a, d) {
 	readFile(pg + "/index.js", "utf-8", function (err, str) {
-		var plainR = [], astR;
 		if (err) {
 			d(err);
 			return;
 		}
-		t(str, "f", function (i, previous) {
-			if (previous === ".") return t.next();
-			if (str.indexOf("foo", i) !== i) return t.next();
-			t.next(3);
-			i = t.index;
-			if (str[i] !== ".") return t.resume();
-			t.next();
-			i = t.index;
-			if (str.indexOf("bar", i) !== i) return t.resume();
-			t.next(3);
-			i = t.index;
-			if (str[i] !== "(") return t.resume();
-			plainR.push({ point: i + 2, line: t.line, column: i + 2 - t.columnIndex });
-			return t.resume();
+		var plainR = t(str, function (emitter) {
+			emitter.on("trigger:f", function (accessor) {
+				if (accessor.previousToken === ".") return;
+				if (!accessor.skipCodePart("foo")) return;
+				accessor.skipWhitespace();
+				if (!accessor.skipCodePart(".")) return;
+				accessor.skipWhitespace();
+				if (!accessor.skipCodePart("bar")) return;
+				accessor.skipWhitespace();
+				accessor.collectScope();
+			});
 		});
-		astR = ast(str).sort(function (astA, astB) { return astA.point - astB.point; });
+		var astR = ast(str);
 		a(plainR.length, astR.length, "Length");
-		astR.forEach(function (val, i) { a.deep(plainR[i], val, i); });
+		astR.forEach(function (val, i) {
+			if (!plainR[i]) return;
+			delete plainR[i].raw;
+			a.deep(plainR[i], val, i);
+		});
 		d();
 	});
 };

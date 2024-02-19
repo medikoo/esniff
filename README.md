@@ -22,31 +22,49 @@ To port it to Browser or any other (non CJS) environment, use your favorite CJS 
 
 Using main module you can configure sophisticated parser on your own. However, first, **see preprared [API utilities](#API) that may already address use cases you have**.
 
-#### esniff(code, triggerChar, callback)
+#### esniff(code, executor)
 
-- `code` Code to parse
-- `triggerChar` Character which is expected to trigger custom handling via `callback`
-- `callback` To detect and eventually handle case we're after
+- `code` - Code to parse
+- `executor` - A function to be executed immediately by the constructor, It receives an `emitter` parameter.
 
-Example: Find all `require(..)` calls:
+`emitter` emits following events:
+
+- `trigger:<char>` - When char is a code character approached in code, that is not a whitespaces, is not in a middle of identificator, is not part of a comment, string, template string or regular expression.
+
+Emitter passes to listener and `accessor` object, which provides access to current parser state and allows to manipulate parsing process. `accessor` exposes following methods:
+
+- `skipCodePart(codePart)` - Skips forward through input _codePart_ assuming parser index points start of given part. Returns true if given `codePart` was found and index and skipped
+- `skipIdentifier` - Skips approached identifier (can be function name or property name), returns `{ name, start, end }` meta object
+- `skipWhitespace` - Skips any whitespace and comments founds at current parsing index
+- `collectScope` - If at current index `(` character is found, it registers given paranthesis scope for registrations (it's content will be returned as one of the results after finished parsing)
+- `stop` - Stops parsing process
+- `index` - Returns currently parsed index
+- `previousToken` - Previous non-whitespace character
+- `scopeDepth` - Current scope depth
+
+##### Example
+
+Parse all `require(..)` calls:
 
 ```javascript
 var esniff = require("esniff");
 
-var result = esniff("var x = require('foo/bar')", "r", function (index, previous, nest) {
-  if (previous === ".") return next(); // Ignore x.require calls
-  if (code.indexOf("require", index) !== index) return esniff.next(); // Not really `require` call
-  next("require".length); // Move after `require` and skip any following whitespace
-  index = esniff.index; // Update index
-  if (code[i] !== "(") return resume(); // Not `require(`
-  return collectNest(); // Collect all code between parenthesis
-});
+var parseRequires = function (code) {
+  return esniff(code, function (emitter) {
+    emitter.on("trigger:r", function (accessor) {
+      if (accessor.previousToken === ".") return;
+      if (!accessor.skipCodePart("require")) return;
+      accessor.skipWhitespace();
+      accessor.collectScope();
+    });
+  });
+};
 
-console.log(result);
-[{ point: 17, column: 17, line: 1, raw: "'foo/bar'" }];
+console.log(parseRequires("var x = require('foo/bar')"));
+[{ type: "scope", point: 17, column: 17, line: 1, raw: "'foo/bar'" }];
 ```
 
-#### API
+#### Predefined utils for common use cases
 
 #### accessedProperties(objName) _(esniff/accessed-properties)_
 
@@ -96,7 +114,6 @@ console.log(result); // ['"raz"', ' "dwa"', ' [\'raz\', \'dwa\']']
 
 - _esniff_ assumes code that you pass is syntactically correct, it won't inform you about any syntax errors and may produce unexpected and nonsense results when such code is used.
 - There's single case of syntactically correct code, which will make _esniff_ produce incorrect results, it's division made directly on object literal (e.g. `x = { foo: 'bar' } / 14`, esniff in that case will assume that `/` starts regular expression). Still there's not known use case where such code may make any sense, and many popular JS source code parsers share very same vulnerability.
-- _esniff_ may work with new syntax introduced by ECMAScript 6 but it has not been fully revised in that matter yet. Pull requests are welcome.
 
 ## Tests
 

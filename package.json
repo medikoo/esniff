@@ -21,6 +21,7 @@
 	"dependencies": {
 		"d": "^1.0.1",
 		"es5-ext": "^0.10.62",
+		"event-emitter": "^0.3.5",
 		"type": "^2.7.2"
 	},
 	"devDependencies": {
@@ -36,6 +37,14 @@
 		"extends": "medikoo/es5",
 		"root": true,
 		"overrides": [
+			{
+				"files": [
+					"index.js"
+				],
+				"rules": {
+					"max-depth": "off"
+				}
+			},
 			{
 				"files": [
 					"index.js",

@@ -1,265 +1,266 @@
 "use strict";
 
 var ensureString        = require("type/string/ensure")
-  , isValue             = require("type/value/is")
   , ensurePlainFunction = require("type/plain-function/ensure")
   , from                = require("es5-ext/array/from")
   , primitiveSet        = require("es5-ext/object/primitive-set")
+  , eventEmitter        = require("event-emitter")
+  , allOff              = require("event-emitter/all-off")
   , d                   = require("d")
   , eolSet              = require("./lib/ws-eol")
   , wsSet               = require("./lib/ws")
-  , objHasOwnProperty   = Object.prototype.hasOwnProperty
-  , preRegExpSet        = primitiveSet.apply(null, from(";{=([,<>+-*/%&|^!~?:}"))
-  , nonNameSet          = primitiveSet.apply(null, from(";{=([,<>+-*/%&|^!~?:})].`"));
+  , identStart          = require("./lib/ident-start-pattern")
+  , identNext           = require("./lib/ident-next-pattern");
 
-var move, startCollect, endCollect, collectNest, $ws, $common, $string, $comment, $multiComment
-  , $regExp, $template, index, char, line, columnIndex, afterWs, previousChar, nest, nestedTokens
-  , results, userCode, userTriggerChar, isUserTriggerOperatorChar, userCallback, quote, collectIndex
-  , data, nestRelease, handleEol, templateContextLength, templateContext;
+var objHasOwnProperty = Object.prototype.hasOwnProperty
+  , preRegExpSet = primitiveSet.apply(null, from(";{=([,<>+-*/%&|^!~?:}"))
+  , nonNameSet = primitiveSet.apply(null, from(";{=([,<>+-*/%&|^!~?:})].`"))
+  , reIdentStart = new RegExp(identStart)
+  , reIdentNext = new RegExp(identNext);
 
-handleEol = function () {
-	if (char === "\r" && userCode[index + 1] === "\n") ++index;
+var code, index, char, state, columnIndex, line, quote, scopeDepth, templateContext, previousToken
+  , followsWhitespace, results, followsSkip, collectedScopeDatum, collectedScopeData
+  , collectedScopeDepth;
+
+var handleEol = function () {
+	if (char === "\r" && code[index + 1] === "\n") char = code[++index];
 	columnIndex = index + 1;
 	++line;
 };
 
-move = function (j) {
-	if (!char) return;
-	if (index >= j) return;
-	while (index < j) {
-		if (!char) return;
-		if (objHasOwnProperty.call(wsSet, char)) {
-			if (objHasOwnProperty.call(eolSet, char)) handleEol();
-		} else {
-			previousChar = char;
+var emitter = eventEmitter();
+var accessor = Object.create(null, {
+	skipCodePart: d(function (codePart) {
+		var codePartLength = codePart.length;
+		for (var i = 0; i < codePartLength; ++i) {
+			if (code[index + i] !== codePart[i]) return false;
 		}
-		char = userCode[++index];
-	}
-};
-
-startCollect = function (oldNestRelease) {
-	var isNewLine = objHasOwnProperty.call(eolSet, userCode[index]);
-	if (isValue(collectIndex)) nestedTokens.push([data, collectIndex, oldNestRelease]);
-	data = {
-		point: index + 1,
-		line: isNewLine ? line + 1 : line,
-		column: isNewLine ? 0 : index + 1 - columnIndex
-	};
-	collectIndex = index;
-};
-
-endCollect = function () {
-	var previous;
-	data.raw = userCode.slice(collectIndex, index);
-	results.push(data);
-	if (nestedTokens.length) {
-		previous = nestedTokens.pop();
-		data = previous[0];
-		collectIndex = previous[1];
-		nestRelease = previous[2];
-		return;
-	}
-	data = null;
-	collectIndex = null;
-	nestRelease = null;
-};
-
-collectNest = function () {
-	var old = nestRelease;
-	nestRelease = nest;
-	++nest;
-	move(index + 1);
-	startCollect(old);
-	return $ws;
-};
-
-$common = function () {
-	if (char === "'" || char === "\"") {
-		quote = char;
-		char = userCode[++index];
-		return $string;
-	}
-	if (char === "`") {
-		char = userCode[++index];
-		return $template;
-	}
-	if (char === "(" || char === "{" || char === "[") {
-		++nest;
-	} else if (char === ")" || char === "}" || char === "]") {
-		if (nestRelease === --nest) endCollect();
-		if (char === "}") {
-			templateContextLength = templateContext.length;
-			if (templateContextLength && templateContext[templateContextLength - 1] === nest + 1) {
-				templateContext.pop();
-				char = userCode[++index];
-				return $template;
-			}
-		}
-	} else if (char === "/") {
-		if (objHasOwnProperty.call(preRegExpSet, previousChar)) {
-			char = userCode[++index];
-			return $regExp;
-		}
-	}
-	if (
-		char !== userTriggerChar ||
-		// Exclude cases when trigger char is operator char
-		// (as it cannot be the continuation of name we're in context of	)
-		(!isUserTriggerOperatorChar &&
-			// Exclude cases when trigger char is not preceded by whitespace
-			// and previous char is not operator char (we're in middle of ongoing word token)
-			!afterWs &&
-			previousChar &&
-			!objHasOwnProperty.call(nonNameSet, previousChar))
-	) {
-		previousChar = char;
-		char = userCode[++index];
-		return $ws;
-	}
-
-	return userCallback(index, previousChar, nest);
-};
-
-$comment = function () {
-	while (char) {
-		if (objHasOwnProperty.call(eolSet, char)) {
-			handleEol();
-			return;
-		}
-		char = userCode[++index];
-	}
-};
-
-$multiComment = function () {
-	while (char) {
-		if (char === "*") {
-			char = userCode[++index];
-			if (char === "/") return;
-			continue;
-		}
-		if (objHasOwnProperty.call(eolSet, char)) handleEol();
-		char = userCode[++index];
-	}
-};
-
-$ws = function () {
-	afterWs = false;
-	while (char) {
-		if (objHasOwnProperty.call(wsSet, char)) {
-			afterWs = true;
-			if (objHasOwnProperty.call(eolSet, char)) handleEol();
-		} else if (char === "/") {
-			var next = userCode[index + 1];
-			if (next === "/") {
-				char = userCode[(index += 2)];
-				afterWs = true;
-				$comment();
-			} else if (next === "*") {
-				char = userCode[(index += 2)];
-				afterWs = true;
-				$multiComment();
+		index += codePartLength;
+		char = code[index];
+		previousToken = code[index - 1];
+		followsWhitespace = false;
+		followsSkip = true;
+		return true;
+	}),
+	skipIdentifier: d(function () {
+		if (!reIdentStart.test(char)) return null;
+		var startIndex = index;
+		var identifier = char;
+		while ((char = code[++index]) && reIdentNext.test(char)) identifier += char;
+		followsWhitespace = false;
+		followsSkip = true;
+		previousToken = code[index - 1];
+		return { name: identifier, start: startIndex, end: index };
+	}),
+	skipWhitespace: d(function () {
+		while (char) {
+			if (objHasOwnProperty.call(wsSet, char)) {
+				if (objHasOwnProperty.call(eolSet, char)) handleEol();
+			} else if (char === "/") {
+				if (code[index + 1] === "/") {
+					// Single line comment
+					index += 2;
+					char = code[index];
+					while (char) {
+						if (objHasOwnProperty.call(eolSet, char)) {
+							handleEol();
+							break;
+						}
+						char = code[++index];
+					}
+				} else if (code[index + 1] === "*") {
+					index += 2;
+					char = code[index];
+					while (char) {
+						if (objHasOwnProperty.call(eolSet, char)) handleEol();
+						if (char === "*" && code[index + 1] === "/") {
+							char = code[++index];
+							break;
+						}
+						char = code[++index];
+					}
+				} else {
+					break;
+				}
 			} else {
 				break;
 			}
-		} else {
-			break;
+			followsWhitespace = true;
+			followsSkip = true;
+			char = code[++index];
 		}
-		char = userCode[++index];
-	}
-	if (!char) return null;
-	return $common;
-};
+	}),
+	collectScope: d(function () {
+		if (char !== "(") return;
+		previousToken = char;
+		char = code[++index];
+		followsSkip = true;
+		if (collectedScopeDatum) collectedScopeData.push(collectedScopeDepth, collectedScopeDatum);
+		collectedScopeDepth = ++scopeDepth;
+		collectedScopeDatum = {
+			type: "scope",
+			point: index + 1,
+			line: line,
+			column: index - columnIndex + 1
+		};
+	}),
+	stop: d(function () { state = null; }),
+	index: d.gs(function () { return index; }),
+	previousToken: d.gs(function () { return previousToken; }),
+	scopeDepth: d.gs(function () { return scopeDepth; })
+});
 
-$string = function () {
-	while (char) {
-		if (char === quote) {
-			char = userCode[++index];
-			previousChar = quote;
-			return $ws;
-		}
-		if (char === "\\") {
-			if (objHasOwnProperty.call(eolSet, userCode[++index])) handleEol();
-		}
-		char = userCode[++index];
-	}
-	return null;
-};
-
-$regExp = function () {
-	while (char) {
-		if (char === "/") {
-			previousChar = "/";
-			char = userCode[++index];
-			return $ws;
-		}
-		if (char === "\\") ++index;
-		char = userCode[++index];
-	}
-	return null;
-};
-
-$template = function () {
-	while (char) {
-		if (char === "`") {
-			char = userCode[++index];
-			previousChar = "`";
-			return $ws;
-		}
-		if (char === "$") {
-			if (userCode[index + 1] === "{") {
-				char = userCode[(index += 2)];
-				previousChar = "{";
-				templateContext.push(++nest);
-				return $ws;
-			}
-		}
-		if (char === "\\") {
-			if (objHasOwnProperty.call(eolSet, userCode[++index])) handleEol();
-		}
-		char = userCode[++index];
-	}
-	return null;
-};
-
-module.exports = exports = function (code, triggerChar, callback) {
-	var state;
-
-	userCode = ensureString(code);
-	userTriggerChar = ensureString(triggerChar);
-	if (userTriggerChar.length !== 1) {
-		throw new TypeError(userTriggerChar + " should be one character long string");
-	}
-	userCallback = ensurePlainFunction(callback);
-	isUserTriggerOperatorChar = objHasOwnProperty.call(nonNameSet, userTriggerChar);
-	index = 0;
-	char = userCode[index];
-	line = 1;
+module.exports = function (userCode, executor) {
+	code = ensureString(userCode);
+	executor = ensurePlainFunction(executor);
+	allOff(emitter);
+	executor(emitter);
+	index = -1;
+	state = "out";
 	columnIndex = 0;
-	afterWs = false;
-	previousChar = null;
-	nest = 0;
-	nestedTokens = [];
-	results = [];
+	line = 1;
+	scopeDepth = 0;
 	templateContext = [];
-	exports.forceStop = false;
-	state = $ws;
-	while (state) state = state();
+	previousToken = null;
+	followsWhitespace = true;
+	results = [];
+	followsSkip = false;
+	collectedScopeDatum = null;
+	collectedScopeData = [];
+	collectedScopeDepth = null;
+
+	stateLoop: while (state) {
+		if (followsSkip) followsSkip = false;
+		else char = code[++index];
+		if (!char) break;
+
+		switch (state) {
+			case "out":
+				if (objHasOwnProperty.call(wsSet, char)) {
+					if (objHasOwnProperty.call(eolSet, char)) {
+						handleEol();
+					}
+					followsWhitespace = true;
+					continue stateLoop;
+				}
+				if (char === "/") {
+					if (previousToken && objHasOwnProperty.call(preRegExpSet, previousToken)) {
+						state = "slashOrRegexp";
+					} else {
+						state = "slash";
+					}
+				} else if (char === "'" || char === "\"") {
+					state = "string";
+					quote = char;
+				} else if (char === "`") {
+					state = "template";
+				} else if (char === "(" || char === "{" || char === "[") {
+					++scopeDepth;
+				} else if (char === ")" || char === "}" || char === "]") {
+					if (scopeDepth === collectedScopeDepth) {
+						collectedScopeDatum.raw = code.slice(collectedScopeDatum.point - 1, index);
+						results.push(collectedScopeDatum);
+						collectedScopeDatum = collectedScopeData.pop();
+						collectedScopeDepth = collectedScopeData.pop();
+					}
+					--scopeDepth;
+					if (char === "}") {
+						if (templateContext[templateContext.length - 1] === scopeDepth + 1) {
+							templateContext.pop();
+							state = "template";
+						}
+					}
+				}
+				if (
+					!previousToken ||
+					followsWhitespace ||
+					objHasOwnProperty.call(nonNameSet, previousToken)
+				) {
+					emitter.emit("trigger:" + char, accessor);
+					if (followsSkip) continue stateLoop;
+				}
+				previousToken = char;
+				followsWhitespace = false;
+				continue stateLoop;
+			case "slashOrRegexp":
+			case "slash":
+				if (char === "/") {
+					state = "singleLineComment";
+				} else if (char === "*") {
+					state = "multiLineComment";
+				} else if (objHasOwnProperty.call(eolSet, char)) {
+					handleEol();
+					followsWhitespace = true;
+					state = "out";
+					continue stateLoop;
+				} else if (state === "slashOrRegexp") {
+					state = "regexp";
+				} else {
+					state = "out";
+					continue stateLoop;
+				}
+				break;
+			case "singleLineComment":
+				if (objHasOwnProperty.call(eolSet, char)) {
+					handleEol();
+					followsWhitespace = true;
+					state = "out";
+				}
+				continue stateLoop;
+			case "multiLineComment":
+				if (char === "*") state = "multiLineCommentStar";
+				else if (objHasOwnProperty.call(eolSet, char)) handleEol();
+				continue stateLoop;
+			case "multiLineCommentStar":
+				if (char === "/") {
+					followsWhitespace = true;
+					state = "out";
+				} else if (char !== "*") {
+					if (objHasOwnProperty.call(eolSet, char)) handleEol();
+					state = "multiLineComment";
+				}
+				continue stateLoop;
+			case "string":
+				if (char === "\\") state = "stringEscape";
+				else if (char === quote) state = "out";
+				break;
+			case "stringEscape":
+				if (objHasOwnProperty.call(eolSet, char)) handleEol();
+				state = "string";
+				break;
+			case "template":
+				if (char === "$") state = "templateDollar";
+				else if (char === "\\") state = "templateEscape";
+				else if (char === "`") state = "out";
+				else if (objHasOwnProperty.call(eolSet, char)) handleEol();
+				break;
+			case "templateEscape":
+				if (objHasOwnProperty.call(eolSet, char)) handleEol();
+				state = "template";
+				break;
+			case "templateDollar":
+				if (char === "{") {
+					templateContext.push(++scopeDepth);
+					state = "out";
+				} else if (char !== "$") {
+					if (objHasOwnProperty.call(eolSet, char)) handleEol();
+					state = "template";
+				}
+				break;
+			case "regexp":
+				if (char === "\\") state = "regexpEscape";
+				else if (char === "/") state = "out";
+				break;
+			case "regexpEscape":
+				state = "regexp";
+				break;
+			/* istanbul ignore next */
+			default:
+				throw new Error("Unexpected state " + state);
+		}
+		previousToken = null;
+		followsWhitespace = false;
+	}
+
 	return results;
 };
-
-Object.defineProperties(exports, {
-	$ws: d($ws),
-	$common: d($common),
-	collectNest: d(collectNest),
-	move: d(move),
-	index: d.gs(function () { return index; }),
-	line: d.gs(function () { return line; }),
-	nest: d.gs(function () { return nest; }),
-	columnIndex: d.gs(function () { return columnIndex; }),
-	next: d(function (step) {
-		if (!char) return null;
-		move(index + (step || 1));
-		return $ws();
-	}),
-	resume: d(function () { return $common; })
-});

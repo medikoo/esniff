@@ -2,10 +2,7 @@
 
 var ensureString = require("type/string/ensure")
   , isValue      = require("type/value/is")
-  , esniff       = require("./")
-  , next         = esniff.next
-  , resume       = esniff.resume
-  , collectNest  = esniff.collectNest;
+  , esniff       = require("./");
 
 module.exports = function (name/*, options*/) {
 	var options = Object(arguments[1])
@@ -21,27 +18,23 @@ module.exports = function (name/*, options*/) {
 	length = names.length;
 	return function (code) {
 		code = ensureString(code);
-		return esniff(code, names[0][0], function (i, previous) {
-			var j = 0, prop;
-			if (previous === ".") {
-				if (!asProperty) return next();
-			} else if (!asPlain) {
-				return next();
-			}
-			while (j < length) {
-				prop = names[j];
-				if (code.indexOf(prop, i) !== i) return next();
-				next(prop.length);
-				i = esniff.index;
-				++j;
-				if (j < length) {
-					if (code[i] !== ".") return resume();
-					next();
-					i = esniff.index;
+		return esniff(code, function (emitter) {
+			emitter.on("trigger:" + names[0][0], function (accessor) {
+				if (accessor.previousToken === ".") {
+					if (!asProperty) return;
+				} else if (!asPlain) {
+					return;
 				}
-			}
-			if (code[i] !== "(") return resume();
-			return collectNest();
+				for (var i = 0, propertyName; (propertyName = names[i]); ++i) {
+					if (!accessor.skipCodePart(propertyName)) return;
+					accessor.skipWhitespace();
+					if (i < length - 1) {
+						if (!accessor.skipCodePart(".")) return;
+						accessor.skipWhitespace();
+					}
+				}
+				accessor.collectScope();
+			});
 		});
 	};
 };
