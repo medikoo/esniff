@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.0.0](https://github.com/medikoo/esniff/compare/v1.1.3...v2.0.0) (2024-02-19)
+
+### ⚠ BREAKING CHANGES
+
+- Main `esniff` interface changed from `code, trigger, callback` to `code, executor` where executor function is provided with emitter that provides access to internal parsing process
+- Property and variable names resolution now respects ES2015+ language rules instead of ES5
+- Utilties were moved:
+  - `ensure-string-literal.js` -> `utils/ensure-string-literal.js`
+  - `is-string-literal.js` -> `utils/is-string-literal.js`
+  - `is-var-name-valid.js` -> `utils/is-variable-name.js`
+
+### Features
+
+- Replace parser with state machine based event driven variant ([0d9bf17](https://github.com/medikoo/esniff/commit/0d9bf1736c795a06d563ce550b50c8a3d90bf1a7))
+- Support ES2015 template strings syntax ([4016496](https://github.com/medikoo/esniff/commit/401649625c35174380fc5eabf5e77f479f09a46f))
+- Upgrade variable and property name patterns to ES2015+ ([7f2f4ab](https://github.com/medikoo/esniff/commit/7f2f4ab68b04d323a8fe305badac403629992656))
+
+### Maintenance Improvements
+
+- Move basic utils into `utils` directory ([afc6ddf](https://github.com/medikoo/esniff/commit/afc6ddf3e3b0bb3b7c8708370d94dd47dc1bdf03))
+- Refactor `stripComments` to rely on main parser ([6d2dd7f](https://github.com/medikoo/esniff/commit/6d2dd7f916c0d54444df061ff0997481dc253f21))
+- Rely on `type` package instead of `es5-ext` ([2a79744](https://github.com/medikoo/esniff/commit/2a79744dff8c04e8dcccb63f0493c2d1e2e7f414))
+
 ### [1.1.3](https://github.com/medikoo/esniff/compare/v1.1.2...v1.1.3) (2024-01-04)
 
 ### Maintenance Improvements
