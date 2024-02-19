@@ -39,6 +39,7 @@ Emitter passes to listener and `accessor` object, which provides access to curre
 - `index` - Returns currently parsed index
 - `previousToken` - Previous non-whitespace character
 - `scopeDepth` - Current scope depth
+- `shouldCollectComments` - Whether data about code comments should be collected in the result
 
 ##### Example
 

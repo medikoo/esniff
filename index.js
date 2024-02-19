@@ -20,7 +20,7 @@ var objHasOwnProperty = Object.prototype.hasOwnProperty
 
 var code, index, char, state, columnIndex, line, quote, scopeDepth, templateContext, previousToken
   , followsWhitespace, results, followsSkip, collectedScopeDatum, collectedScopeData
-  , collectedScopeDepth;
+  , collectedScopeDepth, commentDatum, shouldCollectComments;
 
 var handleEol = function () {
 	if (char === "\r" && code[index + 1] === "\n") char = code[++index];
@@ -59,21 +59,47 @@ var accessor = Object.create(null, {
 			} else if (char === "/") {
 				if (code[index + 1] === "/") {
 					// Single line comment
+					if (shouldCollectComments) {
+						commentDatum = {
+							type: "comment",
+							point: index,
+							line: line,
+							column: index - columnIndex
+						};
+					}
 					index += 2;
 					char = code[index];
 					while (char) {
 						if (objHasOwnProperty.call(eolSet, char)) {
+							if (commentDatum) {
+								commentDatum.endPoint = index;
+								results.push(commentDatum);
+								commentDatum = null;
+							}
 							handleEol();
 							break;
 						}
 						char = code[++index];
 					}
 				} else if (code[index + 1] === "*") {
+					if (shouldCollectComments) {
+						commentDatum = {
+							type: "comment",
+							point: index,
+							line: line,
+							column: index - columnIndex
+						};
+					}
 					index += 2;
 					char = code[index];
 					while (char) {
 						if (objHasOwnProperty.call(eolSet, char)) handleEol();
 						if (char === "*" && code[index + 1] === "/") {
+							if (commentDatum) {
+								commentDatum.endPoint = index + 2;
+								results.push(commentDatum);
+								commentDatum = null;
+							}
 							char = code[++index];
 							break;
 						}
@@ -107,14 +133,18 @@ var accessor = Object.create(null, {
 	stop: d(function () { state = null; }),
 	index: d.gs(function () { return index; }),
 	previousToken: d.gs(function () { return previousToken; }),
-	scopeDepth: d.gs(function () { return scopeDepth; })
+	scopeDepth: d.gs(function () { return scopeDepth; }),
+	shouldCollectComments: d.gs(
+		function () { return shouldCollectComments; },
+		function (value) { shouldCollectComments = Boolean(value); }
+	)
 });
 
 module.exports = function (userCode, executor) {
 	code = ensureString(userCode);
 	executor = ensurePlainFunction(executor);
 	allOff(emitter);
-	executor(emitter);
+	executor(emitter, accessor);
 	index = -1;
 	state = "out";
 	columnIndex = 0;
@@ -185,8 +215,24 @@ module.exports = function (userCode, executor) {
 			case "slashOrRegexp":
 			case "slash":
 				if (char === "/") {
+					if (shouldCollectComments) {
+						commentDatum = {
+							type: "comment",
+							point: index - 1,
+							line: line,
+							column: index - columnIndex - 1
+						};
+					}
 					state = "singleLineComment";
 				} else if (char === "*") {
+					if (shouldCollectComments) {
+						commentDatum = {
+							type: "comment",
+							point: index - 1,
+							line: line,
+							column: index - columnIndex - 1
+						};
+					}
 					state = "multiLineComment";
 				} else if (objHasOwnProperty.call(eolSet, char)) {
 					handleEol();
@@ -202,6 +248,11 @@ module.exports = function (userCode, executor) {
 				break;
 			case "singleLineComment":
 				if (objHasOwnProperty.call(eolSet, char)) {
+					if (commentDatum) {
+						commentDatum.endPoint = index;
+						results.push(commentDatum);
+						commentDatum = null;
+					}
 					handleEol();
 					followsWhitespace = true;
 					state = "out";
@@ -215,6 +266,11 @@ module.exports = function (userCode, executor) {
 				if (char === "/") {
 					followsWhitespace = true;
 					state = "out";
+					if (commentDatum) {
+						commentDatum.endPoint = index + 1;
+						results.push(commentDatum);
+						commentDatum = null;
+					}
 				} else if (char !== "*") {
 					if (objHasOwnProperty.call(eolSet, char)) handleEol();
 					state = "multiLineComment";
