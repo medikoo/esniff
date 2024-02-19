@@ -16,8 +16,6 @@ It aims at use cases where we don't need full AST tree, but instead we're intere
 
     $ npm install esniff
 
-To port it to Browser or any other (non CJS) environment, use your favorite CJS bundler. No favorite yet? Try: [Browserify](http://browserify.org/), [Webmake](https://github.com/medikoo/modules-webmake) or [Webpack](http://webpack.github.io/)
-
 ### Usage
 
 Using main module you can configure sophisticated parser on your own. However, first, **see preprared [API utilities](#API) that may already address use cases you have**.
