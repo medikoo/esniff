@@ -48,7 +48,7 @@
 			{
 				"files": [
 					"index.js",
-					"is-var-name-valid.js"
+					"utils/is-variable-name.js"
 				],
 				"rules": {
 					"max-lines": "off"
@@ -56,7 +56,7 @@
 			},
 			{
 				"files": [
-					"is-var-name-valid.js"
+					"utils/is-variable-name.js"
 				],
 				"rules": {
 					"no-misleading-character-class": "off"
