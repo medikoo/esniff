@@ -204,7 +204,8 @@ module.exports = function (userCode, executor) {
 				if (
 					!previousToken ||
 					followsWhitespace ||
-					objHasOwnProperty.call(nonNameSet, previousToken)
+					objHasOwnProperty.call(nonNameSet, previousToken) ||
+					objHasOwnProperty.call(nonNameSet, char)
 				) {
 					emitter.emit("trigger:" + char, accessor);
 					if (followsSkip) continue stateLoop;
