@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.1](https://github.com/medikoo/esniff/compare/v2.0.0...v2.0.1) (2024-02-21)
+
+### Bug Fixes
+
+- Fix release of operator char trigger event ([1309a18](https://github.com/medikoo/esniff/commit/1309a187ed9dd82aea9f3b9fc3bd4b986c005fcb))
+
 ## [2.0.0](https://github.com/medikoo/esniff/compare/v1.1.3...v2.0.0) (2024-02-19)
 
 ### ⚠ BREAKING CHANGES
