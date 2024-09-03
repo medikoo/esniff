@@ -27,14 +27,14 @@ Using main module you can configure sophisticated parser on your own. However, f
 
 `emitter` emits following events:
 
-- `trigger:<char>` - When char is a code character approached in code, that is not a whitespaces, is not in a middle of identificator, is not part of a comment, string, template string or regular expression.
+- `trigger:<char>` - When char is a code character approached in code, that is not a whitespace, is not in a middle of identificator, is not part of a comment, string, template string or regular expression.
 
-Emitter passes to listener and `accessor` object, which provides access to current parser state and allows to manipulate parsing process. `accessor` exposes following methods:
+Emitter passes to listener the `accessor` object, which provides access to current parser state and allows to manipulate parsing process. `accessor` exposes following methods:
 
-- `skipCodePart(codePart)` - Skips forward through input _codePart_ assuming parser index points start of given part. Returns true if given `codePart` was found and index and skipped
-- `skipIdentifier` - Skips approached identifier (can be function name or property name), returns `{ name, start, end }` meta object
-- `skipWhitespace` - Skips any whitespace and comments founds at current parsing index
-- `collectScope` - If at current index `(` character is found, it registers given paranthesis scope for registrations (it's content will be returned as one of the results after finished parsing)
+- `skipCodePart(codePart)` - Skips forward through input _codePart_ assuming parser index points start of given part. Returns true if given `codePart` was found
+- `skipIdentifier` - Skips approached identifier (can be function name or property name), returns `{ name, start, end }` meta object that describes location and identifier name
+- `skipWhitespace` - Skips any whitespace and comments found at current parsing index
+- `collectScope` - If at current index `(` character is found, it registers given paranthesis scope for _registrations_ (its content will be returned as one of the results after finished parsing)
 - `stop` - Stops parsing process
 - `index` - Returns currently parsed index
 - `previousToken` - Previous non-whitespace character
